@@ -3,9 +3,9 @@
 ## Content
 
 - [Introduction](##Introduction)
-- [Package requirement](##Package requirement)
-- [Installation environment](##Installation environment)
-- [Build a phylogenetic tree](###Step 1: Build a phylogenetic tree)
+- [Package requirement](##Packagerequirement)
+- [Installation environment](##Installationenvironment)
+- [Build a phylogenetic tree](###Buildaphylogenetictree)
   - [a. 16S Amplicon](####a. 16S Amplicon)
   - [b. WGS Metagenome](####b. WGS Metagenome)
 - [Model training and prediction](###Step 2: Model training and prediction)
