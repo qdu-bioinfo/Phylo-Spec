@@ -160,17 +160,17 @@ chmod a+x example.sh
 
 ## Supplementary
 
-**Synthetic Dataset 1** contains 148 artificial microbiomes (common species).
+[**Synthetic Dataset 1**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Synthetic%20Dataset%201) contains 148 artificial microbiomes (common species).
 
-**Synthetic Dataset 2** contains 148 artificial microbiomes (unclassified species).
+[**Synthetic Dataset 2**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Synthetic%20Dataset%202) contains 148 artificial microbiomes (unclassified species).
 
-**Real Dataset 1** contains 2010 IBD 16S amplicon samples processed by Parallel-Meta Suite.
+[**Real Dataset 1**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%2016S_IBD) contains 2010 IBD 16S amplicon samples processed by Parallel-Meta Suite.
 
 [**Real Dataset 2**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%2016S_CRC) contains 412 CRC 16S amplicon samples processed by Parallel-Meta Suite.
 
-**Real Dataset 3** contains 139 CRC WGS Metagenome samples processed by MetaPhlAn4.
+[**Real Dataset 3**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%20WGS_CRC) contains 139 CRC WGS Metagenome samples processed by MetaPhlAn4.
 
-**Real Dataset 4** contains 104 T2D WGS Metagenome samples processed by MetaPhlAn4.
+[**Real Dataset 4**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%20WGS_T2D) contains 104 T2D WGS Metagenome samples processed by MetaPhlAn4.
 
 ## Contact
 
