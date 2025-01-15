@@ -16,11 +16,11 @@
 - [Run the example with one click](##Runtheexamplewithoneclick)
 - [Supplementary](##Supplementary)
 
-## Introduction
+## Introduction <a name="Introduction"></a>
 
 Phylo-Spec, a phylogeny-driven deep learning algorithm, integrates microbial richness within a phylogenetic hierarchy and assigns unclassified species to virtual nodes, reducing data misalignment and uncertainty.  Phylo-Spec outperforms existing methods in synthetic and real-world datasets, demonstrating superior accuracy in classifying diseases like IBD, CRC, and T2D, establishing it as a robust tool for microbiome-based health prediction.
 
-## Package requirement
+## Package requirement <a name="package-requirement"></a>
 
 ```
 torch >= 2.3.1
