@@ -8,7 +8,7 @@
 - [Build a phylogenetic tree](#build-a-phylogenetic-tree)
   - [a. 16S Amplicon](#a-16s-amplicon)
   - [b. WGS Metagenome](#b-wgs-metagenome)
-- [Model training and prediction](#model-training-and-prediction)
+- [Model training and testing](#model-training-and-prediction)
   - [a. Normal status](#a-normal-status)
   - [b. Unclassified status](#b-unclassified-status)
   - [c. Five cross validation](#c-five-cross-validation)
