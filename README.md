@@ -3,7 +3,7 @@
 ## Content
 
 - [Introduction](##Introduction)
-- [Package requirement](##Packagerequirement)
+- [Package requirement](##Package-requirement)
 - [Installation environment](##Installationenvironment)
 - [Build a phylogenetic tree](###Buildaphylogenetictree)
   - [a. 16S Amplicon](####a.16SAmplicon)
