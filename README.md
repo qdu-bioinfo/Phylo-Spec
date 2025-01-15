@@ -166,7 +166,7 @@ chmod a+x example.sh
 
 **Real Dataset 1** contains 2010 IBD 16S amplicon samples processed by Parallel-Meta Suite.
 
-**Real Dataset 2** contains 412 CRC 16S amplicon samples processed by Parallel-Meta Suite.
+[**Real Dataset 2**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%2016S_CRC) contains 412 CRC 16S amplicon samples processed by Parallel-Meta Suite.
 
 **Real Dataset 3** contains 139 CRC WGS Metagenome samples processed by MetaPhlAn4.
 
