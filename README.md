@@ -79,7 +79,7 @@ We provide phylogenetic trees of metaphlan4 and metaphlan3 databases. You can ge
 | -------- | ----------------------- | ---------------------- | :--: | ------- |
 | sample1  | 0.001                   | 0.002                  |      | Healthy |
 | sample2  | 0                       | 0.003                  |      | Healthy |
-| sample3  | 0                       | 0                      |      | Disease |
+| sample3  | 0.005                   | 0                      |      | Disease |
 
 ```
 python ./src/Phylogeny/WGS/WGS_Phlyogeny.py -c ./example/WGS/example_train.csv -t ./database/WGS/wgs_mpa4_phylogeny.nwk -o output
@@ -117,7 +117,7 @@ Saved taxonomy.csv and phylogeny.nwk in "./database" (e.g. 16S and WGS)
 | ------- | ----------------------- | --------------- | :--: | ------- |
 | sample1 | 0.001                   | 0.002           |      | Healthy |
 | sample2 | 0                       | 0.003           |      | Healthy |
-| sample3 | 0                       | 0               |      | Disease |
+| sample3 | 0.005                   | 0               |      | Disease |
 
 The input taxonomy format is:
 
