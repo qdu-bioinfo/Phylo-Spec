@@ -43,7 +43,7 @@ sh init.sh
 cd Phylo-Spec
 ```
 
-Then all tools are located at 'src' folder:
+Then all tools are located at "src" folder:
 
 ```
 PhyloSpec_train_test.py // For model training and testing
