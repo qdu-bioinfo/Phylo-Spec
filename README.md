@@ -65,7 +65,7 @@ In Windows, you can directly execute the command. The relevant software and data
 | -------- | ------- | ------- | :--: | ------- |
 | sample1  | 0.001   | 0.002   |      | Healthy |
 | sample2  | 0       | 0.003   |      | Healthy |
-| sample3  | 0       | 0       |      | Disease |
+| sample3  | 0.005   | 0       |      | Disease |
 
 ```
 python ./src/Phylogeny/16S/16S_Phlyogeny.py -c ./example/16S/example_train.csv -f ./database/16S/gg_13database.fa -o output
