@@ -1,0 +1,9 @@
+README.md filter=lfs diff=lfs merge=lfs -text
+database filter=lfs diff=lfs merge=lfs -text
+output filter=lfs diff=lfs merge=lfs -text
+results filter=lfs diff=lfs merge=lfs -text
+src filter=lfs diff=lfs merge=lfs -text
+data filter=lfs diff=lfs merge=lfs -text
+example filter=lfs diff=lfs merge=lfs -text
+inti.sh filter=lfs diff=lfs merge=lfs -text
+requirements.txt filter=lfs diff=lfs merge=lfs -text
