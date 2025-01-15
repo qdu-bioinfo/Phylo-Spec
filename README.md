@@ -2,28 +2,27 @@
 
 ## Content
 
-- [Introduction](##Introduction)
-- [Package requirement](##Package-requirement)
-- [Installation environment](##Installationenvironment)
-- [Build a phylogenetic tree](###Buildaphylogenetictree)
-  - [a. 16S Amplicon](####a.16SAmplicon)
-  - [b. WGS Metagenome](####b.WGSMetagenome)
-- [Model training and prediction](###Step2:Model training and prediction)
-  - [a. Normal status](####a.Normalstatus)
-  - [b. Unclassified status](####b.Unclassifiedstatus)
-  - [c. Five cross validation](####c.Fivecrossvalidation)
-- [Feature Importance Ranking](###Step3:FeatureImportanceRanking)
-- [Run the example with one click](##Runtheexamplewithoneclick)
-- [Supplementary](##Supplementary)
+- [Introduction](#introduction)
+- [Package requirement](#package-requirement)
+- [Installation environment](#installation-environment)
+- [Build a phylogenetic tree](#build-a-phylogenetic-tree)
+  - [a. 16S Amplicon](#a-16s-amplicon)
+  - [b. WGS Metagenome](#b-wgs-metagenome)
+- [Model training and prediction](#model-training-and-prediction)
+  - [a. Normal status](#a-normal-status)
+  - [b. Unclassified status](#b-unclassified-status)
+  - [c. Five cross validation](#c-five-cross-validation)
+- [Feature Importance Ranking](#feature-importance-ranking)
+- [Run the example with one click](#run-the-example-with-one-click)
+- [Supplementary](#supplementary)
+- [Contact](#contact)
 
-## Introduction 
+## Introduction
 
-<a name="Introduction"></a>
-Phylo-Spec, a phylogeny-driven deep learning algorithm, integrates microbial richness within a phylogenetic hierarchy and assigns unclassified species to virtual nodes, reducing data misalignment and uncertainty.  Phylo-Spec outperforms existing methods in synthetic and real-world datasets, demonstrating superior accuracy in classifying diseases like IBD, CRC, and T2D, establishing it as a robust tool for microbiome-based health prediction.
+Phylo-Spec, a phylogeny-driven deep learning algorithm, integrates microbial richness within a phylogenetic hierarchy and assigns unclassified species to virtual nodes, reducing data misalignment and uncertainty. Phylo-Spec outperforms existing methods in synthetic and real-world datasets, demonstrating superior accuracy in classifying diseases like IBD, CRC, and T2D, establishing it as a robust tool for microbiome-based health prediction.
 
-## Package requirement 
+## Package requirement
 
-<a name="Package-requirement"></a>
 ```
 torch >= 2.3.1
 pandas >= 2.2.2
@@ -41,7 +40,7 @@ biopython >= 1.83
 sh init.sh
 ```
 
-```python
+```
 cd Phylo-Spec
 ```
 
@@ -55,47 +54,47 @@ PhyloSpec_Imp.py // For model output feature importance
 WGS_Phlyogeny.py // For model obtaining metagenomic phylogenetic trees
 ```
 
-### Build a phylogenetic tree
+## Build a phylogenetic tree
 
 This step is optional, the phylogeny tree can either be constructed from representative sequences (e.g. marker gene or amplicon), or provided by users from a NEWICK format file (e.g. for shotgun).
 
-#### a. 16S Amplicon
+### a. 16S Amplicon
 
-In Windows, you can directly execute the command. The relevant software and database have been integrated into the software package, including Mafft multiple sequence alignment, FastTree phylogenetic tree construction, and Greengenes (v13) database.The Greengenes database we provide is under "./database/16S".You can specify the output path '-o', the default output path is “./output”
+In Windows, you can directly execute the command. The relevant software and database have been integrated into the software package, including Mafft multiple sequence alignment, FastTree phylogenetic tree construction, and Greengenes (v13) database. The Greengenes database we provide is under "./database/16S". You can specify the output path '-o', the default output path is "./output"
 
 | SampleID | 4371463 | 2250985 | ...  | Group   |
-| ------- | ------- | ------- | :--: | ------- |
-| sample1 | 0.001   | 0.002   |      | Healthy |
-| sample2 | 0       | 0.003   |      | Healthy |
-| sample3 | 0       | 0       |      | Disease |
+| -------- | ------- | ------- | :--: | ------- |
+| sample1  | 0.001   | 0.002   |      | Healthy |
+| sample2  | 0       | 0.003   |      | Healthy |
+| sample3  | 0       | 0       |      | Disease |
 
 ```
 python ./src/Phylogeny/16S/16S_Phlyogeny.py -c ./example/16S/example_train.csv -f ./database/16S/gg_13database.fa -o output
 ```
 
-#### b. WGS Metagenome
+### b. WGS Metagenome
 
-We provide phylogenetic trees of metaphlan4 and metaphlan3 databases. You can get the phylogenetic tree Newick file of the relevant species by directly executing the command.The database is in "./database/WGS".
+We provide phylogenetic trees of metaphlan4 and metaphlan3 databases. You can get the phylogenetic tree Newick file of the relevant species by directly executing the command. The database is in "./database/WGS".
 
 | SampleID | s__Clostridia_bacterium | s__Rothia_mucilaginosa | ...  | Group   |
-| ------- | ----------------------- | ---------------------- | :--: | ------- |
-| sample1 | 0.001                   | 0.002                  |      | Healthy |
-| sample2 | 0                       | 0.003                  |      | Healthy |
-| sample3 | 0                       | 0                      |      | Disease |
+| -------- | ----------------------- | ---------------------- | :--: | ------- |
+| sample1  | 0.001                   | 0.002                  |      | Healthy |
+| sample2  | 0                       | 0.003                  |      | Healthy |
+| sample3  | 0                       | 0                      |      | Disease |
 
 ```
 python ./src/Phylogeny/WGS/WGS_Phlyogeny.py -c ./example/WGS/example_train.csv -t ./database/WGS/wgs_mpa4_phylogeny.nwk -o output
 ```
 
-### Model training and prediction
+## Model training and prediction
 
-All files generated by the model are in the “./output” folder.
+All files generated by the model are in the "./output" folder.
 
-You can assign microbial signature tables, phylogenetic tree.nwK files, and taxonomic tables by '-c', '-t', and '-taxo'(e.g. unclassified species) respectively. In addition, you can specify the output path of the model '-o'. In the meantime, train, test, and cross-validate the model using --PhyloSpec train, --PhyloSpec test, and --PhyloSpec cv
+You can assign microbial signature tables, phylogenetic tree.nwK files, and taxonomic tables by '-c', '-t', and '-taxo' (e.g. unclassified species) respectively. In addition, you can specify the output path of the model '-o'. In the meantime, train, test, and cross-validate the model using --PhyloSpec train, --PhyloSpec test, and --PhyloSpec cv
 
-#### a. Normal status
+### a. Normal status
 
-The normal state is the normal input abundance table(e.g. OTU or Species).
+The normal state is the normal input abundance table (e.g. OTU or Species).
 
 Training process:
 
@@ -105,15 +104,15 @@ python ./src/model/PhyloSpec_train_test.py -t ./example/16S/phylogeny.nwk -c ./e
 
 Testing Process:
 
-````
+```
 python ./src/model/main_train_test.py -t ./example/16S/phylogeny.nwk -c ./example/16S/example_test.csv --PhyloSpec test
-````
+```
 
-#### b. Unclassified status
+### b. Unclassified status
 
-The species contains unclassified cases (e.g. "xxx_Unclassified_xxx" or "xxx_unclassified_xxx").And you need to enter the "-taxo" taxonomy table additionally.
+The species contains unclassified cases (e.g. "xxx_Unclassified_xxx" or "xxx_unclassified_xxx"). And you need to enter the "-taxo" taxonomy table additionally.
 
-Saved taxonomy.csv and phylogeny.nwk in "./database"(e.g. 16S and WGS)
+Saved taxonomy.csv and phylogeny.nwk in "./database" (e.g. 16S and WGS)
 
 | example | s__Clostridia_bacterium | s__unclassified | ...  | Group   |
 | ------- | ----------------------- | --------------- | :--: | ------- |
@@ -121,7 +120,7 @@ Saved taxonomy.csv and phylogeny.nwk in "./database"(e.g. 16S and WGS)
 | sample2 | 0                       | 0.003           |      | Healthy |
 | sample3 | 0                       | 0               |      | Disease |
 
-The input taxonomy format is
+The input taxonomy format is:
 
 ```
 Kingdom Phylum  Class   Order   Family  Genus   Species
@@ -142,19 +141,19 @@ Testing Process:
 python ./src/model/PhyloSpec_train_test.py -t ./example/Unclassified/phylogeny.nwk -c ./example/Unclassified/example_test.csv -taxo ./example/Unclassified/example_taxonomy.csv --PhyloSpec test
 ```
 
-#### c. Five cross validation
+### c. Five cross validation
 
-We also provide a one-click run of the five cross validation
+We also provide a one-click run of the five cross validation:
 
 ```
 python ./src/model/PhyloSpec_cv.py -t ./example/CV/phylogeny.nwk -c ./example/CV/example_cv.csv -taxo ./example/CV/example_taxonomy.csv --PhyloSpec cv
 ```
 
-### Phylo-Spec feature importance
+## Feature Importance Ranking
 
-All files generated by the model are in the “./output” folder.
+All files generated by the model are in the "./output" folder.
 
-The output file is "Feature_Importance_Score.xlsx", which has 5 sub-tables: leaf node (species) importance, internal node importance, all node importance, node relationship table and node relationship "nwk" format
+The output file is "Feature_Importance_Score.xlsx", which has 5 sub-tables: leaf node (species) importance, internal node importance, all node importance, node relationship table, and node relationship "nwk" format.
 
 ```
 python ./src/model/PhyloSpec_Imp.py
@@ -172,17 +171,17 @@ chmod a+x example.sh
 
 ## Supplementary
 
-**Synthetic Dataset 1**contains 148 artificial microbiomes(common species)
+**Synthetic Dataset 1** contains 148 artificial microbiomes (common species).
 
-**Synthetic Dataset 2** contains 148 artificial microbiomes(unclassified species)
+**Synthetic Dataset 2** contains 148 artificial microbiomes (unclassified species).
 
-**Real Dateset 1** contains 2010 IBD 16S amplicon samples processed by Parallel-Meta Suite.
+**Real Dataset 1** contains 2010 IBD 16S amplicon samples processed by Parallel-Meta Suite.
 
-**Real Dateset 2** contains 412 CRC 16S amplicon samples processed by Parallel-Meta Suite.
+**Real Dataset 2** contains 412 CRC 16S amplicon samples processed by Parallel-Meta Suite.
 
-**Real Dateset 3** contains 139 CRC WGS Metagenome samples processed by MetaPhlAn4.
+**Real Dataset 3** contains 139 CRC WGS Metagenome samples processed by MetaPhlAn4.
 
-**Real Dateset 4** contains 104 T2D WGS Metagenome samples processed by MetaPhlAn4.
+**Real Dataset 4** contains 104 T2D WGS Metagenome samples processed by MetaPhlAn4.
 
 ## Contact
 
