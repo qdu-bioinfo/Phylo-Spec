@@ -48,7 +48,6 @@ Then all tools are located at "src" folder:
 ```
 PhyloSpec_train_test.py // For model training and testing
 PhyloSpec_cv.py // For model five cross validation
-PhyloSpec_Imp.py // For model output feature importance
 16S_Phlyogeny.py // For model obtaining 16S rRNA amplicon phylogenetic tree
 WGS_Phlyogeny.py // For model obtaining metagenomic phylogenetic trees
 ```
