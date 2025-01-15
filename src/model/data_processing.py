@@ -102,8 +102,7 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
         return table, tree
 
     for feature in unclassified_features:
-        missing_species = pd.Series(dtype='str')  # 修改变量名为 missing_species
-
+        missing_species = pd.Series(dtype='str')  
         taxonomic_levels = ['Genus', 'Family', 'Order', 'Class', 'Phylum', 'Kingdom']
         for level in taxonomic_levels:
             matched_taxa = taxonomy_table.loc[taxonomy_table['Species'] == feature, level]
@@ -114,7 +113,7 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
                     (taxonomy_table[level] == taxon) &
                     (~taxonomy_table['Species'].isin(abundance_table.columns)) &
                     (~taxonomy_table['Species'].str.contains('Unclassified'))
-                ]['Species']  # 保持逻辑一致，只是改为 missing_species
+                ]['Species'] 
 
                 if not missing_species.empty:
                     break
@@ -126,10 +125,8 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
         unclassified_abundance = abundance_table[feature]
         average_abundance = unclassified_abundance / len(missing_species)
 
-        for species in missing_species:  # 修改变量名为 species
+        for species in missing_species:
             if species in table.columns:
-                table[species] += average_abundance
-            else:
                 table[species] = average_abundance
         table.drop(columns=[feature], inplace=True)
 
