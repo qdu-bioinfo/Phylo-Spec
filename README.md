@@ -58,7 +58,7 @@ This step is optional, the phylogeny tree can either be constructed from represe
 
 ### a. 16S Amplicon
 
-In Windows, you can directly execute the command. The relevant software and database have been integrated into the software package, including Mafft multiple sequence alignment, FastTree phylogenetic tree construction, and Greengenes (v13) database. The Greengenes database we provide is under "./database/16S". You can specify the output path '-o', the default output path is "./output"
+In Windows, you can directly execute the command. The relevant software and database have been integrated into the software package, including Mafft multiple sequence alignment, FastTree phylogenetic tree construction, and Greengenes (v13-8) database. The Greengenes database we provide is under "./database/16S". You can specify the output path '-o', the default output path is "./output"
 
 | SampleID | 4371463 | 2250985 | ...  | Group   |
 | -------- | ------- | ------- | :--: | ------- |
