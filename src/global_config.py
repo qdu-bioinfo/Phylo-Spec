@@ -20,15 +20,6 @@ def get_config_train_test():
     return parser.parse_args()
 
 
-# feature_importance
-def get_config_feature_importance():
-    parser = argparse.ArgumentParser(description="Configuration for calculating feature importance.")
-    parser.add_argument('-pkl', type=str,  default='./output/Node_Features.pkl', help="Path to the pickle file with data.")
-    parser.add_argument('-o', type=str, default='./output/', help="Directory to save model and features. Default is './output/'.")
-
-    return parser.parse_args()
-
-
 # 16S_Phlyogeny
 def get_config_16S_Phlyogeny():
     parser = argparse.ArgumentParser(description="Process OTU sequences and generate phylogenetic tree.")
