@@ -36,11 +36,11 @@ biopython >= 1.83
 ## Installation environment
 
 ```
-cd Phylo-Spec
-```
-
-```
-sh init.sh
+1.git clone https://github.com/qdu-bioinfo/Phylo-Spec.git
+2.cd Phylo-Spec
+3.conda create -n PhyloSpec python=3.9
+4.conda activate PhyloSpec
+5.sh init.sh
 ```
 
 Then all tools are located at "src" folder:
