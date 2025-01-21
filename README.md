@@ -36,11 +36,11 @@ biopython >= 1.83
 ## Installation environment
 
 ```
-sh init.sh
+cd Phylo-Spec
 ```
 
 ```
-cd Phylo-Spec
+sh init.sh
 ```
 
 Then all tools are located at "src" folder:
