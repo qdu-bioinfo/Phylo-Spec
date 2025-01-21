@@ -103,7 +103,7 @@ python ./src/model/PhyloSpec_train_test.py -t ./example/16S/phylogeny.nwk -c ./e
 Testing Process:
 
 ```
-python ./src/model/main_train_test.py -t ./example/16S/phylogeny.nwk -c ./example/16S/example_test.csv --PhyloSpec test
+python ./src/model/PhyloSpec_train_test.py -t ./example/16S/phylogeny.nwk -c ./example/16S/example_test.csv --PhyloSpec test
 ```
 
 ### b. Unclassified status
