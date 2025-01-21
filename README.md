@@ -152,7 +152,6 @@ python ./src/model/PhyloSpec_cv.py -t ./example/CV/phylogeny.nwk -c ./example/CV
 For convenience, you can run the processes above by running the example.sh in folder './example'.
 
 ```
-cd ./example
 chmod a+x example.sh
 ./example.sh
 ```
