@@ -18,7 +18,7 @@ class AuxiliaryModel(nn.Module):
         self.res_blocks = nn.ModuleList([convolution_block(self.channel, self.channel, kernel_size=kernel_size) for _ in range(num_res_blocks)])
         self.flatten = nn.Flatten()
     def forward(self, x, conv_order, feature_map, data, leaf_to_species,labels, node_weights):
-        self.node_features = {}
+        self.node_features = {} # Clear node_features each time forward propagation
         all_features = []
         for leaf, species in leaf_to_species.items():
             node_index = data.columns.get_loc(species) - 1
@@ -68,7 +68,7 @@ class PhyloSpec(nn.Module):
 
     def forward(self, x, conv_order, feature_map, data, leaf_to_species,labels, node_weights):
         all_features = []
-
+        # Processing leaf nodes
         for leaf, species in leaf_to_species.items():
             node_index = data.columns.get_loc(species) - 1
             feature_map[leaf] = x[:, node_index].view(-1, 1, 1).float()
@@ -78,11 +78,11 @@ class PhyloSpec(nn.Module):
             feature_map[leaf] = self.conv1x1_layers[layer_name](feature_map[leaf])
             feature_map[leaf] = feature_map[leaf] * node_weights[leaf]
             all_features.append(feature_map[leaf])
-
+            # Accumulate leaf node features
             if leaf not in self.accumulated_node_features:
                 self.accumulated_node_features[leaf] = []
             self.accumulated_node_features[leaf].append(feature_map[leaf].detach().cpu().numpy())
-
+        # Handling unmatched columns
         matched_columns = set(leaf_to_species.values())
         for column in data.columns[1:-1]:
             if column not in matched_columns:
@@ -92,7 +92,7 @@ class PhyloSpec(nn.Module):
                     self.conv1x1_layers[layer_name] = nn.Conv1d(1, self.channel, kernel_size=1)
                 unmatched_feature = self.conv1x1_layers[layer_name](unmatched_feature)
                 all_features.append(unmatched_feature)
-
+        # Processing internal nodes
         for children, parent in conv_order:
             child_feats = [feature_map[child] for child in children]
             combined_feat = torch.cat(child_feats, dim=2).float()
@@ -101,11 +101,11 @@ class PhyloSpec(nn.Module):
             combined_feat = combined_feat * node_weights[parent]
             feature_map[parent] = combined_feat
             all_features.append(feature_map[parent])
-
+            # Accumulate features of internal nodes
             if parent not in self.accumulated_node_features:
                 self.accumulated_node_features[parent] = []
             self.accumulated_node_features[parent].append(combined_feat.detach().cpu().numpy())
-
+        #Finally combine features
         combined_features = torch.cat(all_features, dim=2).float()
         combined_features = nn.MaxPool1d(2)(combined_features)
         combined_features = self.flatten(combined_features)
@@ -117,7 +117,7 @@ class PhyloSpec(nn.Module):
 
     def clear_accumulated_features(self):
         self.accumulated_node_features = {}
-
+# Use auxiliary model to calculate input size
 def calculate_fc1_input_dim(aux_model, X, conv_order, data, leaf_to_species, node_weights):
     sample_input = torch.tensor(X, dtype=torch.float32)
     feature_map = {}
