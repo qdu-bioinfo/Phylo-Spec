@@ -37,7 +37,7 @@ def assign_unique_names(tree):
             clade.name = f"internal_{internal_node_counter}"
             internal_node_counter += 1
     return tree
-
+# Get the convolution order
 def get_conv_order(tree):
     nodes = []
     parents = {}
@@ -60,7 +60,7 @@ def get_conv_order(tree):
 
     postorder_traversal(tree.root, None, nodes, parents, conv_order)
     return nodes, parents, conv_order, node_relations
-
+# Calculate node weight
 def calculate_node_weights(tree):
     node_weights = {}
     for clade in tree.find_clades(order="level"):
@@ -121,7 +121,7 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
         if missing_species.empty:
             print(f"No missing species found in abundance table for feature '{feature}'.")
             continue
-
+        # Evenly distribute the abundance of unclassified features to the missing OTUs
         unclassified_abundance = abundance_table[feature]
         average_abundance = unclassified_abundance / len(missing_species)
 
