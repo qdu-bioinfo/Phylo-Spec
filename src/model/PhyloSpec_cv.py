@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import torch
 import sys
 import numpy as np
@@ -52,7 +55,14 @@ def cv_function(config, seed):
 
     fold_auc = []
 
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+    if config.pkl and os.path.exists(config.pkl):  # 如果提供了pkl文件
+        with open(config.pkl, 'rb') as f:
+            fold = pickle.load(f)  # 应该是一个 list，格式如：[(train_idx, val_idx), ...]
+        print("Using predefined fold indices from:", config.pkl)
+    else:
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+        fold = list(skf.split(X, y))  # 动态生成
+        print("No pkl provided, generating fold indices with random seed.")
 
     for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
         set_seed(seed)
@@ -99,6 +109,7 @@ def cv_function(config, seed):
             model, train_loader, val_loader, criterion, optimizer, conv_order, data, leaf_to_species, node_weights,
             num_epochs=config.ep, num_classes=num_classes
         )
+
 
         # Calculate AUC
         y_val_encoded = np.array(test_group)

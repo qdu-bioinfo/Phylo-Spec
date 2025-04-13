@@ -17,6 +17,9 @@ def get_config_train_test():
     parser.add_argument('-o', type=str, default='./output/',help="Directory to save model and features. Default is './output/'.")
     parser.add_argument('-taxo', type=str, help="Path to the taxonomy file.")
     # os.path.join(os.getcwd(), 'output') or './output/'
+
+    parser.add_argument('-pkl', type=str, default=None,
+                        help="Optional path to a .pkl file with predefined 5/10-fold splits.")
     return parser.parse_args()
 
 
