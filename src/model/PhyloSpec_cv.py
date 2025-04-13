@@ -148,7 +148,7 @@ def cv_function(config, seed):
 def main():
     seed = 42
     config = get_config_train_test()
-    cv_function(config, seed)
+    #cv_function(config, seed)
     if config.PhyloSpec == 'cv':
         cv_function(config, seed)
     else:
