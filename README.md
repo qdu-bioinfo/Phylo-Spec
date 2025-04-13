@@ -32,6 +32,7 @@ imbalanced-learn
 ete3
 matplotlib
 biopython
+openpyxl
 ```
 
 ## Installation environment
