@@ -115,7 +115,7 @@ def cv_function(config, seed):
 
         fold_auc.append(roc_auc)
 
-    # 计算每个类别的平均 AUC
+
     fold_auc = np.array(fold_auc)  # shape: (n_folds, n_classes)
     average_auc_per_class = np.mean(fold_auc, axis=0)
 
