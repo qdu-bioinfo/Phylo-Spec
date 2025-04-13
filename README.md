@@ -146,7 +146,7 @@ python ./src/model/PhyloSpec_train_test.py -t ./example/Unclassified/phylogeny.n
 
 ### c. Five cross validation
 
-We also provide a one-click run of the five cross validation:
+We also provide one-click to run five-fold cross validation. If you provide a pkl fold file after splitting, you can use '-pkl' to input your file, otherwise input the entire feature table (consistent with the input of a. normal state and b. unclassified state), and we will randomly split the folds into five.
 
 ```
 python ./src/model/PhyloSpec_cv.py -t ./example/CV/phylogeny.nwk -c ./example/CV/example_cv.csv -taxo ./example/CV/example_taxonomy.csv --PhyloSpec cv
