@@ -157,9 +157,8 @@ The input for Phylo-Spec's multi-disease classification is exactly the same as a
 | example | s__Clostridia_bacterium | s__unclassified | ...  | Group   |
 | ------- | ----------------------- | --------------- | :--: | ------- |
 | sample1 | 0.001                   | 0.002           |      | Control |
-| sample2 | 0                       | 0.003           |      | Control |
-| sample3 | 0.005                   | 0               |      | Disease1|
-| sample3 | 0.005                   | 0               |      | Disease2|
+| sample2 | 0                       | 0.005           |      | Disease1|
+| sample3 | 0.001                   | 0               |      | Disease2|
 
 ### e. Phylo-Spec Importance
 
