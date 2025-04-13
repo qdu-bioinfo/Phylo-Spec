@@ -60,7 +60,7 @@ def cv_function(config, seed):
     else:
         skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
         skf_splits = list(skf.split(X, y))
-        print("No pkl provided, generating fold indices with random seed.")
+        print("No pkl provided, generating fold indices with random.")
 
     for fold_idx, (train_idx, val_idx) in enumerate(skf_splits):
         set_seed(seed)
