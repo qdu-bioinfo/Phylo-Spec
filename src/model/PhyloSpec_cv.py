@@ -30,7 +30,6 @@ label_encoder = LabelEncoder()
 
 
 def cv_function(config, seed):
-    seed = seed
     set_seed(seed)
 
     csv_path = config.c
@@ -49,22 +48,21 @@ def cv_function(config, seed):
         X = data.iloc[:, 1:-1].values
         y = label_encoder.fit_transform(data.iloc[:, -1].values)
 
-    num_classes = len(np.unique(y))  # Number of classes (2 for binary, >2 for multiclass)
-
+    num_classes = len(np.unique(y))
     node_weights = calculate_node_weights(tree)
 
     fold_auc = []
 
-    if config.pkl and os.path.exists(config.pkl):  # 如果提供了pkl文件
+    if config.pkl and os.path.exists(config.pkl):
         with open(config.pkl, 'rb') as f:
-            fold = pickle.load(f)  # 应该是一个 list，格式如：[(train_idx, val_idx), ...]
+            skf_splits = pickle.load(f)
         print("Using predefined fold indices from:", config.pkl)
     else:
         skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
-        fold = list(skf.split(X, y))  # 动态生成
+        skf_splits = list(skf.split(X, y))
         print("No pkl provided, generating fold indices with random seed.")
 
-    for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+    for fold_idx, (train_idx, val_idx) in enumerate(skf_splits):
         set_seed(seed)
 
         X_train_fold, X_val_fold = X[train_idx], X[val_idx]
@@ -78,7 +76,7 @@ def cv_function(config, seed):
         X_val_fold = scaler.transform(X_val_fold)
 
         X_train_tensor = torch.tensor(X_train_smote, dtype=torch.float32)
-        y_train_tensor = torch.tensor(y_train_fold, dtype=torch.long)  # Ensure labels are long for CrossEntropyLoss
+        y_train_tensor = torch.tensor(y_train_fold, dtype=torch.long)
         X_val_tensor = torch.tensor(X_val_fold, dtype=torch.float32)
         y_val_tensor = torch.tensor(y_val_fold, dtype=torch.long)
 
@@ -91,17 +89,14 @@ def cv_function(config, seed):
         fc1_input_dim = calculate_fc1_input_dim(aux_model, X_train_smote, conv_order, data, leaf_to_species,
                                                 node_weights)
 
-
-
-        # Use CrossEntropyLoss for both binary and multi-class classification
         if num_classes == 2:
             model = PhyloSpec(fc1_input_dim=fc1_input_dim, num_res_blocks=1, channel=config.ch,
                               kernel_size=config.ks, out_feature=1).to('cpu')
-            criterion = torch.nn.BCEWithLogitsLoss()  # For binary classification
+            criterion = torch.nn.BCEWithLogitsLoss()
         else:
             model = PhyloSpec(fc1_input_dim=fc1_input_dim, num_res_blocks=1, channel=config.ch,
                               kernel_size=config.ks, out_feature=num_classes).to('cpu')
-            criterion = torch.nn.CrossEntropyLoss()  # For multi-class classification
+            criterion = torch.nn.CrossEntropyLoss()
 
         optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=0.0001)
 
@@ -110,25 +105,24 @@ def cv_function(config, seed):
             num_epochs=config.ep, num_classes=num_classes
         )
 
-
-        # Calculate AUC
         y_val_encoded = np.array(test_group)
         y_score = np.array(all_preds)
 
-        # For binary classification, we need to compute AUC for the positive class (second column)
         if num_classes == 2:
+            roc_auc = [calculate_roc_auc(y_val_encoded, y_score, num_classes)]
+        else:
             roc_auc = calculate_roc_auc(y_val_encoded, y_score, num_classes)
-            # print(f"Fold {fold + 1} ROC AUC (Binary): {roc_auc:.4f}")
-        else:  # For multi-class classification, compute AUC for each class
-            roc_auc = calculate_roc_auc(y_val_encoded, y_score, num_classes)
-            # for i in range(num_classes):
-            #     print(f"Fold {fold + 1} Class {i} ROC AUC (Multiclass): {roc_auc[i]:.4f}")
 
         fold_auc.append(roc_auc)
 
-    # Calculate average AUC
-    average_auc = np.mean(fold_auc)
-    print(f"Average ROC AUC: {average_auc:.4f}")
+    # 计算每个类别的平均 AUC
+    fold_auc = np.array(fold_auc)  # shape: (n_folds, n_classes)
+    average_auc_per_class = np.mean(fold_auc, axis=0)
+
+    print("\nFinal Average ROC AUC per Class:")
+    for i, auc in enumerate(average_auc_per_class):
+        print(f"Class {i} AUC: {auc:.4f}")
+
 
 
 def main():
