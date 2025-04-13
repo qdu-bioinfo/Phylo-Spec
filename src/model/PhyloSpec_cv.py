@@ -1,6 +1,5 @@
 import os
 import pickle
-
 import torch
 import sys
 import numpy as np
@@ -18,6 +17,7 @@ sys.path.append('./')
 from src.global_config import get_config_train_test
 
 
+# Fix random seed for reproducibility
 def set_seed(seed):
     random.seed(seed)
     torch.manual_seed(seed)
@@ -26,33 +26,44 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+
 label_encoder = LabelEncoder()
 
 
+# Cross-validation training and evaluation pipeline
 def cv_function(config, seed):
     set_seed(seed)
 
+    # Load input file paths
     csv_path = config.c
     newick_path = config.t
     taxonomy_path = config.taxo
 
+    # Load and preprocess the phylogenetic tree
     tree = Phylo.read(newick_path, 'newick')
     tree = assign_unique_names(tree)
 
+    # Load features and labels from CSV and match with tree leaves
     X, y, encoder, data = load_and_preprocess_data(csv_path, tree)
     leaf_to_species = match_leaf_nodes(tree, data)
+
+    # Determine convolution order and node relations
     nodes, parents, conv_order, node_relations = get_conv_order(tree)
 
+    # Handle unclassified taxa if present
     if any('Unclassified' in col or 'unclassified' in col for col in data.columns):
         data, tree = process_unclassified_features(tree, data, taxonomy_path)
         X = data.iloc[:, 1:-1].values
         y = label_encoder.fit_transform(data.iloc[:, -1].values)
 
     num_classes = len(np.unique(y))
+
+    # Compute node weights based on tree structure
     node_weights = calculate_node_weights(tree)
 
     fold_auc = []
 
+    # Load or generate CV fold indices
     if config.pkl and os.path.exists(config.pkl):
         with open(config.pkl, 'rb') as f:
             skf_splits = pickle.load(f)
@@ -62,33 +73,41 @@ def cv_function(config, seed):
         skf_splits = list(skf.split(X, y))
         print("No pkl provided, generating fold indices with random.")
 
+    # Start cross-validation
     for fold_idx, (train_idx, val_idx) in enumerate(skf_splits):
         set_seed(seed)
 
+        # Split data
         X_train_fold, X_val_fold = X[train_idx], X[val_idx]
         y_train_fold, y_val_fold = y[train_idx], y[val_idx]
 
+        # Balance classes using SMOTE
         smote = SMOTE(random_state=seed)
         X_train_fold, y_train_fold = smote.fit_resample(X_train_fold, y_train_fold)
 
+        # Normalize features
         scaler = StandardScaler()
         X_train_smote = scaler.fit_transform(X_train_fold)
         X_val_fold = scaler.transform(X_val_fold)
 
+        # Convert to PyTorch tensors
         X_train_tensor = torch.tensor(X_train_smote, dtype=torch.float32)
         y_train_tensor = torch.tensor(y_train_fold, dtype=torch.long)
         X_val_tensor = torch.tensor(X_val_fold, dtype=torch.float32)
         y_val_tensor = torch.tensor(y_val_fold, dtype=torch.long)
 
+        # Construct PyTorch DataLoaders
         train_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_train_tensor, y_train_tensor),
                                                    batch_size=config.bs, shuffle=True)
         val_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_val_tensor, y_val_tensor),
                                                  batch_size=config.bs, shuffle=False)
 
+        # Instantiate auxiliary model for input dimension estimation
         aux_model = AuxiliaryModel()
         fc1_input_dim = calculate_fc1_input_dim(aux_model, X_train_smote, conv_order, data, leaf_to_species,
                                                 node_weights)
 
+        # Initialize model and loss function
         if num_classes == 2:
             model = PhyloSpec(fc1_input_dim=fc1_input_dim, num_res_blocks=1, channel=config.ch,
                               kernel_size=config.ks, out_feature=1).to('cpu')
@@ -100,6 +119,7 @@ def cv_function(config, seed):
 
         optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=0.0001)
 
+        # Train model and evaluate on validation fold
         best_model, test_group, all_preds = cv_train_and_evaluate(
             model, train_loader, val_loader, criterion, optimizer, conv_order, data, leaf_to_species, node_weights,
             num_epochs=config.ep, num_classes=num_classes
@@ -108,6 +128,7 @@ def cv_function(config, seed):
         y_val_encoded = np.array(test_group)
         y_score = np.array(all_preds)
 
+        # Compute ROC AUC
         if num_classes == 2:
             roc_auc = [calculate_roc_auc(y_val_encoded, y_score, num_classes)]
         else:
@@ -115,7 +136,7 @@ def cv_function(config, seed):
 
         fold_auc.append(roc_auc)
 
-
+    # Report average AUC per class
     fold_auc = np.array(fold_auc)  # shape: (n_folds, n_classes)
     average_auc_per_class = np.mean(fold_auc, axis=0)
 
@@ -124,11 +145,10 @@ def cv_function(config, seed):
         print(f"Class {i} AUC: {auc:.4f}")
 
 
-
 def main():
     seed = 42
     config = get_config_train_test()
-    cv_function(config,seed)
+    cv_function(config, seed)
     if config.PhyloSpec == 'cv':
         cv_function(config, seed)
     else:
