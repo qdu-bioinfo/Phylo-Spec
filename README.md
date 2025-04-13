@@ -147,16 +147,17 @@ python ./src/model/PhyloSpec_train_test.py -t ./example/Unclassified/phylogeny.n
 ### c. Five cross validation
 
 We also provide one-click to run five-fold cross validation. If you provide a pkl fold file after splitting, you can use '-pkl' to input your file, otherwise input the entire feature table (consistent with the input of a. normal state and b. unclassified state), and we will randomly split the folds into five.
-# Expected format of config.pkl:
-# A list of k cross-validation folds, where each fold is a tuple:
-#     (train_index: np.ndarray, test_index: np.ndarray)
-# Example:
-#     [
-#         (array([0, 1, 2, ..., 79]), array([80, 81, ..., 99])),
-#         (array([0, 2, 3, ..., 98]), array([1, 5, ..., 87])),
-#         ...
-#     ]
-# Shape: List[Tuple[np.ndarray, np.ndarray]], typically from StratifiedKFold.split().
+
+Expected format of config.pkl:
+A list of k cross-validation folds, where each fold is a tuple:
+    (train_index: np.ndarray, test_index: np.ndarray)
+Example:
+    [
+        (array([0, 1, 2, ..., 79]), array([80, 81, ..., 99])),
+        (array([0, 2, 3, ..., 98]), array([1, 5, ..., 87])),
+        ...
+    ]
+Shape: List[Tuple[np.ndarray, np.ndarray]], typically from StratifiedKFold.split().
 
 ```
 python ./src/model/PhyloSpec_cv.py -t ./example/CV/phylogeny.nwk -c ./example/CV/example_cv.csv -taxo ./example/CV/example_taxonomy.csv --PhyloSpec cv
