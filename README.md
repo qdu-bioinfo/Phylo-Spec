@@ -23,14 +23,15 @@ Phylo-Spec, a phylogeny-driven deep learning algorithm, integrates microbial ric
 ## Package requirement
 
 ```
-torch >= 2.3.1
-pandas >= 2.0.2
-numpy >= 1.24.3
-scikit-learn >= 1.3.0
-imbalanced-learn >= 0.12.3
-ete3 >= 3.1.3
-matplotlib >= 3.7.2
-biopython >= 1.83
+python3.8
+torch
+pandas
+numpy
+scikit-learn
+imbalanced-learn
+ete3
+matplotlib
+biopython
 ```
 
 ## Installation environment
