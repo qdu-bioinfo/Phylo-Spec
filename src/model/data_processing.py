@@ -13,11 +13,15 @@ def load_and_preprocess_data(csv_path, tree):
     y = data.iloc[:, -1].values
     y_encoded, encoder = encode_labels(y)
 
+
+
     return X, y_encoded, encoder, data
 
 def encode_labels(y):
     encoder = LabelEncoder()
     y_encoded = encoder.fit_transform(y)
+    class_mapping = dict(zip(encoder.classes_,range(len(encoder.classes_))))
+    print(f"Class mapping: {class_mapping}")
     return y_encoded, encoder
 
 def match_leaf_nodes(tree, data):
@@ -37,7 +41,7 @@ def assign_unique_names(tree):
             clade.name = f"internal_{internal_node_counter}"
             internal_node_counter += 1
     return tree
-# Get the convolution order
+
 def get_conv_order(tree):
     nodes = []
     parents = {}
@@ -60,7 +64,7 @@ def get_conv_order(tree):
 
     postorder_traversal(tree.root, None, nodes, parents, conv_order)
     return nodes, parents, conv_order, node_relations
-# Calculate node weight
+
 def calculate_node_weights(tree):
     node_weights = {}
     for clade in tree.find_clades(order="level"):
@@ -102,7 +106,8 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
         return table, tree
 
     for feature in unclassified_features:
-        missing_species = pd.Series(dtype='str')  
+        missing_species = pd.Series(dtype='str')  # 修改变量名为 missing_species
+
         taxonomic_levels = ['Genus', 'Family', 'Order', 'Class', 'Phylum', 'Kingdom']
         for level in taxonomic_levels:
             matched_taxa = taxonomy_table.loc[taxonomy_table['Species'] == feature, level]
@@ -113,7 +118,7 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
                     (taxonomy_table[level] == taxon) &
                     (~taxonomy_table['Species'].isin(abundance_table.columns)) &
                     (~taxonomy_table['Species'].str.contains('Unclassified'))
-                ]['Species'] 
+                ]['Species']  # 保持逻辑一致，只是改为 missing_species
 
                 if not missing_species.empty:
                     break
@@ -121,12 +126,14 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
         if missing_species.empty:
             print(f"No missing species found in abundance table for feature '{feature}'.")
             continue
-        # Evenly distribute the abundance of unclassified features to the missing OTUs
+
         unclassified_abundance = abundance_table[feature]
         average_abundance = unclassified_abundance / len(missing_species)
 
-        for species in missing_species:
+        for species in missing_species:  # 修改变量名为 species
             if species in table.columns:
+                table[species] += average_abundance
+            else:
                 table[species] = average_abundance
         table.drop(columns=[feature], inplace=True)
 

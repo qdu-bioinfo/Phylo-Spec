@@ -26,22 +26,20 @@ def set_seed(seed):
 label_encoder = LabelEncoder()
 
 def train_model_function(config, seed):
-
     newick_path = config.t
     train_csv_path = config.c
     taxonomy_path = config.taxo
     tree = Phylo.read(newick_path, 'newick')
     tree = assign_unique_names(tree)
 
-
-
     X_train, y_train, encoder, data_train = load_and_preprocess_data(train_csv_path, tree)
 
     if any("Unclassified" in col or "unclassified" in col for col in data_train.columns):
         data_train, tree = process_unclassified_features(tree, data_train, taxonomy_path)
         X_train = data_train.iloc[:, 1:-1].values
-        # y_train = data_train.iloc[:, -1].values
         y_train = label_encoder.fit_transform(data_train.iloc[:, -1].values)
+
+    num_classes = len(np.unique(y_train))
 
     leaf_to_species = match_leaf_nodes(tree, data_train)
     nodes, parents, conv_order, node_relations = get_conv_order(tree)
@@ -54,9 +52,8 @@ def train_model_function(config, seed):
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
 
-
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-    y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
+    y_train_tensor = torch.tensor(y_train, dtype=torch.long)  # Ensure labels are in long format for CrossEntropyLoss
 
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
     train_loader = DataLoader(train_dataset, batch_size=config.bs, shuffle=True)
@@ -65,17 +62,25 @@ def train_model_function(config, seed):
     fc1_input_dim = calculate_fc1_input_dim(aux_model, X_train, conv_order, data_train, leaf_to_species,
                                             node_weights)
 
-    final_model = PhyloSpec(fc1_input_dim=fc1_input_dim, num_res_blocks=1, channel=config.ch,
-                      kernel_size=config.ks).to('cpu')
+    # final_model = PhyloSpec(fc1_input_dim=fc1_input_dim, num_res_blocks=1, channel=config.ch,
+    #                         kernel_size=config.ks,out_feature=num_classes).to('cpu')
 
-    criterion = nn.BCEWithLogitsLoss()
+    # Choose the loss function based on the number of classes
+    if num_classes == 2:
+        final_model = PhyloSpec(fc1_input_dim=fc1_input_dim, num_res_blocks=1, channel=config.ch,
+                                kernel_size=config.ks, out_feature=1).to('cpu')
+        criterion = nn.BCEWithLogitsLoss()  # For binary classification
+    else:
+        final_model = PhyloSpec(fc1_input_dim=fc1_input_dim, num_res_blocks=1, channel=config.ch,
+                                kernel_size=config.ks, out_feature=num_classes).to('cpu')
+        criterion = nn.CrossEntropyLoss()  # For multi-class classification
+
     optimizer = torch.optim.Adam(final_model.parameters(), lr=config.lr, weight_decay=0.0001)
-
 
     print("Training the model on the entire training set...")
     final_model = train_model(
         final_model, train_loader, criterion, optimizer, conv_order, data_train, leaf_to_species,
-        node_weights=node_weights, num_epochs=config.ep
+        node_weights=node_weights, num_epochs=config.ep, num_classes=num_classes
     )
 
     all_train_labels = []
@@ -93,14 +98,12 @@ def train_model_function(config, seed):
         os.path.join(config.o, 'Node_Features.pkl')
     )
 
-
     scaler_path = os.path.join(config.o, 'StandardScaler.pkl')
     joblib.dump(scaler, scaler_path)
 
-    torch.save(final_model, config.o+'train_model.pth')
+    torch.save(final_model, config.o + 'train_model.pth')
 
     print("End of training")
-
 
 
 
@@ -117,8 +120,9 @@ def test_model_function(config, seed):
     if any("Unclassified" in col or "unclassified" in col for col in data_test.columns):
         data_test, tree = process_unclassified_features(tree, data_test, taxonomy_path)
         X_test = data_test.iloc[:, 1:-1].values
-        # y_test = data_test.iloc[:, -1].values
         y_test = label_encoder.fit_transform(data_test.iloc[:, -1].values)
+
+    num_classes = len(np.unique(y_test))
 
     leaf_to_species = match_leaf_nodes(tree, data_test)
     nodes, parents, conv_order, node_relations = get_conv_order(tree)
@@ -130,7 +134,7 @@ def test_model_function(config, seed):
     X_test = scaler.transform(X_test)
 
     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-    y_test_tensor = torch.tensor(y_test, dtype=torch.float32)
+    y_test_tensor = torch.tensor(y_test, dtype=torch.long)  # For CrossEntropyLoss, labels need to be long type
 
     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
     test_loader = DataLoader(test_dataset, batch_size=config.bs, shuffle=False)
@@ -139,10 +143,19 @@ def test_model_function(config, seed):
 
     print("Testing the model on the test set...")
     y_true, y_scores = evaluate_model_on_test(final_model, test_loader, conv_order, data_test, leaf_to_species,
-                                              node_weights)
+                                              node_weights, num_classes=num_classes)
 
-    roc_auc = roc_auc_score(y_true, y_scores)
-    print(f"ROC AUC: {roc_auc:.4f}")
+    # Calculate AUC
+    if num_classes == 2:
+        auc_val = roc_auc_score(y_true, y_scores)  # For binary classification, directly use y_scores for AUC
+        print(f"ROC AUC (Binary): {auc_val:.4f}")
+    else:
+        # For multi-class, calculate AUC for each class (One-vs-Rest)
+        for i in range(num_classes):
+            auc_val = roc_auc_score(y_true == i, y_scores[:, i])  # One-vs-Rest AUC for multi-class
+            print(f"Class {i} AUC (Multiclass): {auc_val:.4f}")
+
+
 
 def main():
     config = get_config_train_test()
