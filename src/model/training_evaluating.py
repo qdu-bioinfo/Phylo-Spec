@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from sklearn.metrics import roc_curve, auc
 
-# Evaluate model on test data, return true labels and predicted scores
+# Evaluate model on test data
 def evaluate_model_on_test(model, test_loader, conv_order, data, leaf_to_species, node_weights, num_classes=2):
     model.eval()
     test_preds = []
@@ -27,7 +27,7 @@ def calculate_roc_auc(y_true, y_scores, num_classes):
     if num_classes == 2:  # Binary classification
         fpr, tpr, _ = roc_curve(y_true, y_scores)
         roc_auc = auc(fpr, tpr)
-    else:  # Multi-class classification (One-vs-Rest)
+    else:
         roc_auc = []
         for i in range(num_classes):
             fpr, tpr, _ = roc_curve(y_true == i, y_scores[:, i])
@@ -53,7 +53,6 @@ def cv_train_and_evaluate(model, train_loader, test_loader, criterion, optimizer
             loss.backward()
             optimizer.step()
 
-        # Evaluation after epoch
         model.eval()
         model.clear_accumulated_features()
         test_group = []
@@ -87,7 +86,6 @@ def train_model(model, train_loader, criterion, optimizer, conv_order, data, lea
         model.clear_accumulated_features()
 
         for inputs, labels in train_loader:
-            # Label format depends on task type
             if num_classes == 2:
                 labels = labels.float().unsqueeze(1)  # Binary: shape [batch_size, 1]
             else:
@@ -96,7 +94,6 @@ def train_model(model, train_loader, criterion, optimizer, conv_order, data, lea
             optimizer.zero_grad()
             outputs = model(inputs, conv_order, {}, data, leaf_to_species, labels, node_weights)
 
-            # Choose loss function based on task type
             if num_classes == 2:
                 loss = criterion(outputs, labels)  # BCEWithLogitsLoss
             else:
