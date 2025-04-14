@@ -20,7 +20,7 @@
 
 ## Introduction
 
-Phylo-Spec, a phylogeny-driven deep learning algorithm, integrates microbial richness within a phylogenetic hierarchy and assigns unclassified species to virtual nodes, reducing data misalignment and uncertainty. Phylo-Spec outperforms existing methods in synthetic and real-world datasets, demonstrating superior accuracy in classifying diseases like IBD, CRC, and T2D, establishing it as a robust tool for microbiome-based health prediction.
+Phylo-Spec is a phylogenetic-based deep learning algorithm that integrates microbial richness into phylogenetic hierarchies and assigns unclassified species to virtual nodes, thereby reducing data misalignment and uncertainty. Phylo-Spec outperforms existing methods in both synthetic and real datasets, and demonstrates excellent accuracy in the classification of diseases such as inflammatory bowel disease (IBD), colorectal cancer (CRC), and type 2 diabetes (T2D), making it a powerful tool for microbiome-based health prediction. The following features support both binary and multi-classification and automatically identify
 
 ## Package requirement
 
@@ -163,7 +163,7 @@ python ./src/model/PhyloSpec_cv.py -t ./example/CV/phylogeny.nwk -c ./example/CV
 ```
 ### d. Phylo-Spec Multi-disease Classification
 
-Phylo-Spec can automatically identify multiple types of diseases. Its input is exactly the same as above, except that the number of disease types must be greater than 2. The input sample is as follows:
+Phylo-Spec can automatically identify multiple disease types. Its usage and input are exactly the same as the above function, except that the number of disease types must be greater than 2. The input sample is as follows:
 
 | example | s__Clostridia_bacterium | s__unclassified | ...  | Group   |
 | ------- | ----------------------- | --------------- | :--: | ------- |
