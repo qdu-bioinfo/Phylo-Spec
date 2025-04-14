@@ -53,11 +53,9 @@ def train_model_function(config, seed):
     nodes, parents, conv_order, node_relations = get_conv_order(tree)
     node_weights = calculate_node_weights(tree)
 
-    # Address class imbalance using SMOTE
     smote = SMOTE(random_state=seed)
     X_train, y_train = smote.fit_resample(X_train, y_train)
 
-    # Normalize features
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
 
@@ -93,13 +91,13 @@ def train_model_function(config, seed):
         node_weights=node_weights, num_epochs=config.ep, num_classes=num_classes
     )
 
-    # Gather all training labels for saving with node features
+    # Save with node features
     all_train_labels = []
     for batch_idx, (batch_features, batch_labels) in enumerate(train_loader):
         all_train_labels.append(batch_labels)
     all_train_labels = torch.cat(all_train_labels, dim=0).numpy()
 
-    # Save extracted node features and training artifacts
+    # Save training data
     node_features = final_model.accumulated_node_features
     save_node_features_with_pickle(
         node_features,
