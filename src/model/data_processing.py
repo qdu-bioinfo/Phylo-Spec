@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 
-# Load abundance data and reorder features to match tree leaf order
+# Load data
 def load_and_preprocess_data(csv_path, tree):
     data = pd.read_csv(csv_path)
     leaf_names = [leaf.name for leaf in tree.get_terminals()]
@@ -98,7 +98,7 @@ def save_node_features_with_pickle(node_features, node_relations, node_weights, 
     with open(output_file, 'wb') as f:
         pickle.dump(combined_data, f)
 
-# Replace unclassified features by redistributing their abundance to lower-level classified taxa
+# Handling unclassified species through advanced taxonomy
 def process_unclassified_features(tree, abundance_table, taxonomy_path):
     table = abundance_table.copy()
     group_col = table.pop(table.columns[-1])  # Save the label column
@@ -119,7 +119,6 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
             if not matched_taxa.empty:
                 taxon = matched_taxa.values[0]
 
-                # Find classified species in the same taxon not already in the abundance table
                 missing_species = taxonomy_table[
                     (taxonomy_table[level] == taxon) &
                     (~taxonomy_table['Species'].isin(abundance_table.columns)) &
@@ -136,7 +135,6 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
         unclassified_abundance = abundance_table[feature]
         average_abundance = unclassified_abundance / len(missing_species)
 
-        # Evenly distribute abundance to inferred species
         for species in missing_species:
             if species in table.columns:
                 table[species] += average_abundance
