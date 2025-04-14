@@ -39,7 +39,7 @@ def entropy(y):
     probabilities = probabilities[probabilities > 0]
     return -np.sum(probabilities * np.log2(probabilities + 1e-10))
 
-# Compute best information gain for a single feature
+# Compute best information gain
 def best_information_gain(X, y, feature_idx, parent_entropy):
     sorted_indices = np.argsort(X[:, feature_idx])
     sorted_X = X[sorted_indices, feature_idx]
@@ -127,7 +127,7 @@ def main():
     args = get_config_feature_importance()
     print("Start Calculation ... ")
 
-    # Load data: features, relations, branch lengths, true labels
+    # Load data
     with open(args.pkl, 'rb') as f:
         data = pickle.load(f)
 
