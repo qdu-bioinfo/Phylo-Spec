@@ -39,10 +39,13 @@ def cv_train_and_evaluate(model, train_loader, test_loader, criterion, optimizer
                           node_weights, num_epochs=10, num_classes=2):
     for epoch in range(num_epochs):
         model.train()
-        model.clear_accumulated_features()  # Reset internal feature storage (e.g., for GCN aggregation)
+        model.clear_accumulated_features()
 
         for inputs, labels in train_loader:
-            labels = labels.long()
+            if isinstance(criterion, torch.nn.BCEWithLogitsLoss):
+                labels = labels.float()
+            else:
+                labels = labels.long()
 
             optimizer.zero_grad()
             outputs = model(inputs, conv_order, {}, data, leaf_to_species, labels, node_weights)
@@ -56,9 +59,14 @@ def cv_train_and_evaluate(model, train_loader, test_loader, criterion, optimizer
         test_group = []
         all_preds = []
 
+
         with torch.no_grad():
             for inputs, labels in test_loader:
-                labels = labels.long()
+                if isinstance(criterion, torch.nn.BCEWithLogitsLoss):
+                    labels = labels.float()
+                else:
+                    labels = labels.long()
+
                 outputs = model(inputs, conv_order, {}, data, leaf_to_species, labels, node_weights)
                 test_group.extend(labels.numpy())
 
