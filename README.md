@@ -113,8 +113,7 @@ python ./src/model/PhyloSpec_train_test.py -t ./example/Normal/phylogeny.nwk -c 
 
 ### b. Unclassified status
 
-The species contains unclassified cases (e.g., "xxx_Unclassified_xxx" or "xxx_unclassified_xxx"). And you need to enter the "-taxo" taxonomy table additionally.
-
+The species contains unclassified cases (e.g., "xxx_Unclassified_xxx"). And you need to enter the "-taxo" taxonomy table additionally.Phylo-Spec automatically and dynamically classifies virtual nodes using a more advanced taxonomy
 Saved taxonomy.csv and phylogeny.nwk in "./database" (e.g., 16S and WGS)
 
 | example | s__Clostridia_bacterium | s__unclassified | ...  | Group   |
