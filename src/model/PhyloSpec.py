@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import re
 
-# A simple convolution block used in residual connections
+# A convolution block
 def convolution_block(in_channels, out_channels, kernel_size=3, padding="same"):
     return nn.Sequential(
         nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, padding=padding),
@@ -88,7 +88,7 @@ class PhyloSpec(nn.Module):
     def forward(self, x, conv_order, feature_map, data, leaf_to_species, labels, node_weights):
         all_features = []
 
-        # Step 1: Encode leaf features
+        # Step 1:Process leaf features
         for leaf, species in leaf_to_species.items():
             node_index = data.columns.get_loc(species) - 1
             feature_map[leaf] = x[:, node_index].view(-1, 1, 1).float()
