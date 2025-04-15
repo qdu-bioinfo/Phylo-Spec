@@ -163,7 +163,7 @@ python ./src/model/PhyloSpec_cv.py -t ./example/CV/phylogeny.nwk -c ./example/CV
 ```
 ### d. Phylo-Spec Multi-disease Classification
 
-Phylo-Spec can automatically identify multiple disease types. Its usage and input are exactly the same as the above function, except that the number of disease types must be greater than 2. The input sample is as follows:
+Phylo-Spec can automatically identify multiple disease types. Its usage and input are exactly the same as the above function, except that the number of host state types must be greater than 2. The input sample is as follows:
 
 | example | s__Clostridia_bacterium | s__unclassified | ...  | Group   |
 | ------- | ----------------------- | --------------- | :--: | ------- |
