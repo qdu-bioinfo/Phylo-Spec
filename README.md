@@ -202,6 +202,8 @@ chmod a+x example.sh
 
 [**Real Dataset 4**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%20WGS_T2D) contains 116 T2D WGS Metagenome samples processed by MetaPhlAn4.
 
+[**Real Dataset 5**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%20Multi-classification) contains 704 Control, 142 CRC, 914 IBD, 84 IBS, 138 ASD samples processed by Parallel-Meta Suite.
+
 ## Contact
 
 All problems please contact Phylo-Spec development team: **Xiaoquan Su**  Email: [**suxq@qdu.edu.cn**](mailto:suxq@qdu.edu.cn)
