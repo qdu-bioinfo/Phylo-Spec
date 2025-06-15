@@ -29,7 +29,7 @@ def set_seed(seed):
 label_encoder = LabelEncoder()
 
 
- """Cross-validation training and evaluation pipeline."""
+"""Cross-validation training and evaluation pipeline."""
 def cv_function(config, seed):
     set_seed(seed)
 
@@ -128,9 +128,8 @@ def cv_function(config, seed):
         print(f"Class {i} AUC: {auc:.4f}")
 
 
-
+"""Main entry point."""
 def main():
-     """Main entry point."""
     seed = 42
     config = get_config_train_test()
     if config.PhyloSpec == 'cv':
