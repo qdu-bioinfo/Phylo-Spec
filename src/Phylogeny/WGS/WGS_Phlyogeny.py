@@ -16,7 +16,7 @@ def main():
 
 
     nwk_file_path = args.t
-    tree = PhyloTree(nwk_file_path, format=2)
+    tree = PhyloTree(nwk_file_path, format=1)
 
 
     existing_features = []
