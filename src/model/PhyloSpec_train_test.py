@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from torch import nn
 from torch.utils.data import TensorDataset, DataLoader
 from data_processing import load_and_preprocess_data, match_leaf_nodes, assign_unique_names, get_conv_order, \
-    calculate_node_weights, save_node_features_with_pickle, process_unclassified_features
+    calculate_node_weights, save_node_features_with_pickle, process_unclassified_features, tree_p
 from PhyloSpec import PhyloSpec, AuxiliaryModel, calculate_fc1_input_dim
 sys.path.append('./')
 from src.global_config import get_config_train_test
@@ -34,7 +34,8 @@ def train_model_function(config, seed):
     taxonomy_path = config.taxo
 
     # Load phylogenetic tree and assign unique names to nodes
-    tree = Phylo.read(newick_path, 'newick')
+    tree = tree_p(train_csv_path, newick_path)
+    tree = Phylo.read(tree, 'newick')
     tree = assign_unique_names(tree)
 
     # Load and preprocess training data
@@ -122,7 +123,8 @@ def test_model_function(config, seed):
     taxonomy_path = config.taxo
 
     # Load phylogenetic tree and test data
-    tree = Phylo.read(newick_path, 'newick')
+    tree = tree_p(test_csv_path, newick_path)
+    tree = Phylo.read(tree, 'newick')
     tree = assign_unique_names(tree)
 
     X_test, y_test, _, data_test = load_and_preprocess_data(test_csv_path, tree)

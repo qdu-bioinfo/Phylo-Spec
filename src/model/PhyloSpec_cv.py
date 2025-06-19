@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from imblearn.over_sampling import SMOTE
 from data_processing import load_and_preprocess_data, match_leaf_nodes, assign_unique_names, get_conv_order, \
-    calculate_node_weights, process_unclassified_features
+    calculate_node_weights, process_unclassified_features, tree_p
 from PhyloSpec import PhyloSpec, AuxiliaryModel, calculate_fc1_input_dim
 from training_evaluating import calculate_roc_auc, cv_train_and_evaluate
 import random
@@ -37,7 +37,8 @@ def cv_function(config, seed):
     newick_path = config.t
     taxonomy_path = config.taxo
 
-    tree = Phylo.read(newick_path, 'newick')
+    tree = tree_p(csv_path, newick_path)
+    tree = Phylo.read(tree, 'newick')
     tree = assign_unique_names(tree)
 
     X, y, encoder, data = load_and_preprocess_data(csv_path, tree)

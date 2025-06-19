@@ -107,7 +107,7 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
     unclassified_features = [col for col in abundance_table.columns if 'Unclassified' in col or 'unclassified' in col]
 
     if not unclassified_features:
-        table["Group"] = group_col
+        table[abundance_table.columns[-1]] = group_col
         return table, tree
 
     for feature in unclassified_features:
@@ -142,5 +142,29 @@ def process_unclassified_features(tree, abundance_table, taxonomy_path):
                 table[species] = average_abundance
         table.drop(columns=[feature], inplace=True)
 
-    table["Group"] = group_col
+    table[abundance_table.columns[-1]] = group_col
     return table, tree
+
+def tree_p(csv_file_path, nwk_file_path):
+    df = pd.read_csv(csv_file_path)
+    feature_columns = df.columns[1:-1].tolist()
+
+    tree = PhyloTree(nwk_file_path, format=1)
+
+    existing_features = []
+    for feature in feature_columns:
+        nodes = tree.search_nodes(name=feature)
+        if len(nodes) == 1:
+            existing_features.append(nodes[0])
+        elif len(nodes) > 1:
+
+            existing_features.append(nodes[0])
+        else:
+
+            print(f"Feature not found in tree: {feature}")
+
+    tree.prune(existing_features)
+    tmp = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.nwk')
+    tree.write(format=1, outfile=tmp.name)
+    tmp.close()
+    return tmp.name
