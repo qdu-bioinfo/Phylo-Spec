@@ -60,7 +60,9 @@ WGS_Phlyogeny.py // For model obtaining metagenomic phylogenetic trees
 ## Instructions
 
 If building a phylogenetic tree is very time-consuming, we recommend that you use the reference databases that come with the software, GreenGenes13.8, GreenGenes 2, MetaPhlAn3, MetaPhlAn4.
+
 _i_. For 16S rRNA data, we recommend using the phylogenetic tree in the GreenGenes database that is widely accepted by the community. The bacterial taxonomic unit OTU can be directly mapped to the tree structure through the annotation name. Specific usage: " -t ./database/16S/gg13.nwk "
+
 _ii_. For WGS (Whole Genome Shotgun) metagenomic data, we recommend using the species annotation system and corresponding phylogenetic tree provided by MetaPhlAn. Specific usage: " -t ./database/WGS/wgs_mpa4_phylogeny.nwk "
 Otherwise, you can refer to the following method to build a phylogenetic tree
 
