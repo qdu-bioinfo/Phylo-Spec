@@ -217,4 +217,4 @@ chmod a+x example.sh
 
 ## Contact
 
-All problems please contact Phylo-Spec development team: **Xiaoquan Su**  Email: [**suxq@qdu.edu.cn**](mailto:suxq@qdu.edu.cn)
+All problems please contact Phylo-Spec development team: **Dr. Su,Xiaoquan**  Email: [**suxq@qdu.edu.cn**](mailto:suxq@qdu.edu.cn)
