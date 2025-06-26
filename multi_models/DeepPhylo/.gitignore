@@ -1,0 +1,20 @@
+# 忽略文件夹
+work_dirs/
+wandb/
+data/
+dist/
+phy2vec.egg-info/
+temp/
+build/
+prop*/
+
+# 忽略特定文件
+*.txt
+*.out
+*.pkl
+*.npy
+*.log
+*.qza
+*.bak
+
+
