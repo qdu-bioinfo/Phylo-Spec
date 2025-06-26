@@ -88,13 +88,6 @@ overall_probas = np.concatenate(all_probas, axis=0)
 
 overall_kappa = cohen_kappa_score(overall_true, overall_pred, weights='quadratic')
 overall_auc = roc_auc_score(overall_true, overall_probas, multi_class='ovr')
-
-print(f"\nOverall Metrics:")
-print(f"Kappa: {overall_kappa:.4f}")
-print(f"AUC: {overall_auc:.4f}")
-print(f"Avg Fold Kappa: {np.mean(fold_kappa):.4f}")
-print(f"Avg Fold PR AUC: {np.mean(fold_pr_auc):.4f}")
-
 ############################################
 # ROC
 ############################################
