@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 import torch
@@ -10,6 +11,7 @@ from sklearn.preprocessing import LabelEncoder, label_binarize
 import matplotlib.pyplot as plt
 import warnings
 import os
+import argparse
 
 warnings.filterwarnings('ignore')
 
@@ -106,16 +108,19 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, e
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Train CNN model on input CSV.')
+    parser.add_argument('-c', type=str, required=True, help='Path to input CSV file')
+    parser.add_argument('-o', type=str, default='model5_results', help='Directory to save results')
+
+    args = parser.parse_args()
+
     set_seed(42)
 
-    output_dir = "model5_results"
+    output_dir = args.o
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-
-    csv_path = r'csv'
-
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(args.c)
     sample_names = df.iloc[:, 0].values
     X5 = df.iloc[:, 1:-1].values
     num_columns = df.iloc[:, 1:-1].shape[1]

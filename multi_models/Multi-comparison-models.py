@@ -23,7 +23,7 @@ import warnings
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import LabelEncoder
-
+import argparse
 warnings.filterwarnings("ignore")
 
 def set_seed(seed):
@@ -138,7 +138,7 @@ def run_model_1_train(abundance_file,tree_file,in_feature):
     output_xlsx = "prediction_results.xlsx"
     output_label_map = "label_encoding_mapping.csv"
     n_splits = 5
-    epochs = 100
+    epochs = 10
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     df = pd.read_csv(abundance_file, index_col=0)
@@ -559,64 +559,65 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, e
 
 warnings.filterwarnings('ignore')
 
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Run all 5 microbiome models with evaluation.')
+
+    parser.add_argument('-c', '--csv', type=str, required=True, help='Path to input CSV file')
+    parser.add_argument('-t', '--tree', type=str, required=True, help='Path to Newick tree file')
+    parser.add_argument('-l', '--list', type=str, required=True, help='Path to PMCNN feature list CSV')
+    parser.add_argument('-npy', nargs=3, type=str, required=True, metavar=('X', 'Y', 'EMBEDDING'),
+                        help='Paths to DeepPhylo input .npy files: X.npy Y.npy embedding.npy')
+
+    args = parser.parse_args()
+
     set_seed(42)
 
-    # model 1，2 MetaDR, RF
-    csv_path = fr'/Users/bioinfo/Desktop/data/Real Dateset WGS_T2D/WGS_T2D.csv'
-    newick_path = fr'/Users/bioinfo/Desktop/data/Real Dateset WGS_T2D/WGS_T2D.nwk'
+    # Arguments
+    csv_path = args.csv
+    newick_path = args.tree
+    list_path = args.list
+    X_path, y_path, embedding_path = args.npy
 
-    #model 3 PM-CNN
-    list_path = r'/Users/bioinfo/Desktop/RN3/五折/PMCNN/PMCNN_WGS_T2D.csv'
-
-    #model 4 DeepPhylo
-    X_path = r'/Users/bioinfo/Desktop/new_new_new/16S_CRC/DeepPhlyo/CRC_16S_X.npy'
-    y_path = r'/Users/bioinfo/Desktop/new_new_new/16S_CRC/DeepPhlyo/CRC_16S_y.npy'
-    embedding_path = r'/Users/bioinfo/Desktop/new_new_new/16S_CRC/DeepPhlyo/CRC_16S_embeding.npy'
-
-    #model 5 CNN
-    csv = fr'/Users/bioinfo/Desktop/data/Real Dateset WGS_T2D/WGS_T2D.csv'
-
-    # model 1
+    # Model 1 MetaDR
     tree = Phylo.read(newick_path, 'newick')
     tree = assign_unique_names(tree)
     X1, y1, encoder1, data1 = load_and_preprocess_data(csv_path, tree)
-    run_model_1_train(csv_path,newick_path,in_feature=1250)
+    run_model_1_train(csv_path, newick_path, in_feature=1250)
 
-    # model 2
+    # Model 2 RF
     df = pd.read_csv(csv_path)
     X2 = df.iloc[:, 1:-1].values
     y2 = df.iloc[:, -1].values
     encoder2 = LabelEncoder()
     y2_encoded = encoder2.fit_transform(y2)
 
-    # model 3
+    # Model 3 PM-CNN
     data3 = pd.read_csv(csv_path)
     My_list = int_str(list_path)
     data_list, y3 = load_data(data3.iloc[:, 1:-1], data3.iloc[:, -1], My_list)
     X3 = torch.cat(data_list, dim=1)
 
-    # model 4
+    # Model 4 DeepPhylo
     X4 = np.load(X_path, allow_pickle=True)
     y4 = np.load(y_path, allow_pickle=True)
     phy_embedding = np.load(embedding_path)
 
-    # model 5
-    df = pd.read_csv(csv)
+    # Model 5 CNN
+    df = pd.read_csv(csv_path)
     X5 = df.iloc[:, 1:-1].values
     num_columns = df.iloc[:, 1:-1].shape[1]
     y5 = df.iloc[:, -1].values
     encoder5 = LabelEncoder()
     y5_encoded = encoder5.fit_transform(y5)
 
-    all_roc_aucs_model_1 = []
+    # Store AUCs
     auc_scores_model_2 = []
     auc_scores_model_3 = []
     auc_scores_model_4 = []
     auc_scores_model_5 = []
 
     all_fold_roc_data = {
-        # 'model_1': {'true_labels': [], 'pred_scores': []},
         'model_2': {'true_labels': [], 'pred_scores': []},
         'model_3': {'true_labels': [], 'pred_scores': []},
         'model_4': {'true_labels': [], 'pred_scores': []},
@@ -624,48 +625,37 @@ if __name__ == '__main__':
     }
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-
-    all_roc_aucs_model_1 = []
-
     for fold, (train_idx, val_idx) in enumerate(skf.split(X1, y1)):
         print(f"Running Fold {fold + 1}...")
 
-        # model 2
-        auc_score_model_2,y_test,y_pred_prob_model_2 = run_model_2_train(X2, y2_encoded, train_idx, val_idx)
+        # Model 2
+        auc2, y_test, y_pred2 = run_model_2_train(X2, y2_encoded, train_idx, val_idx)
         all_fold_roc_data['model_2']['true_labels'].append(y_test)
-        all_fold_roc_data['model_2']['pred_scores'].append(y_pred_prob_model_2)
-        auc_scores_model_2.append(auc_score_model_2)
+        all_fold_roc_data['model_2']['pred_scores'].append(y_pred2)
+        auc_scores_model_2.append(auc2)
 
+        # Model 3
+        auc3, y3_true, y3_pred = run_model_3_train(X3, y3, train_idx, val_idx)
+        all_fold_roc_data['model_3']['true_labels'].append(y3_true)
+        all_fold_roc_data['model_3']['pred_scores'].append(y3_pred)
+        auc_scores_model_3.append(auc3)
 
-        # model 3
-        auc_score_model_3, all_labels_model_3, all_preds_model_3 = run_model_3_train(X3, y3, train_idx, val_idx)
-        all_fold_roc_data['model_3']['true_labels'].append(all_labels_model_3)
-        all_fold_roc_data['model_3']['pred_scores'].append(all_preds_model_3)
-        auc_scores_model_3.append(auc_score_model_3)
-
-        # model 4
+        # Model 4
         train_idx_4 = [i for i in train_idx if i < len(X4)]
         val_idx_4 = [i for i in val_idx if i < len(X4)]
-        true_labels, pred_labels = run_model_4_train(X4, y4, train_idx_4, val_idx_4, phy_embedding)
-        all_fold_roc_data['model_4']['true_labels'].append(true_labels)
-        all_fold_roc_data['model_4']['pred_scores'].append(pred_labels)
-        auc_score_model_4 = roc_auc_score(true_labels, pred_labels)
-        auc_scores_model_4.append(auc_score_model_4)
+        y4_true, y4_pred = run_model_4_train(X4, y4, train_idx_4, val_idx_4, phy_embedding)
+        all_fold_roc_data['model_4']['true_labels'].append(y4_true)
+        all_fold_roc_data['model_4']['pred_scores'].append(y4_pred)
+        auc4 = roc_auc_score(y4_true, y4_pred)
+        auc_scores_model_4.append(auc4)
 
-        #model 5
-        auc_score_model_cnn, y_test, y_pred_prob_model_cnn = run_cnn_train(X5, y5_encoded, train_idx, val_idx, input_dim=num_columns, output_dim=1,batch_size=64,epochs=10)
-        all_fold_roc_data['model_5']['true_labels'].append(y_test)
-        all_fold_roc_data['model_5']['pred_scores'].append(y_pred_prob_model_cnn)
-        auc_scores_model_5.append(auc_score_model_cnn)
+        # Model 5
+        auc5, y5_true, y5_pred = run_cnn_train(X5, y5_encoded, train_idx, val_idx, input_dim=num_columns, output_dim=1, batch_size=64, epochs=10)
+        all_fold_roc_data['model_5']['true_labels'].append(y5_true)
+        all_fold_roc_data['model_5']['pred_scores'].append(y5_pred)
+        auc_scores_model_5.append(auc5)
 
-    # mean_auc_model_1 = np.mean(all_roc_aucs_model_1)
-    mean_auc_model_2 = np.mean(auc_scores_model_2)
-    mean_auc_model_3 = np.mean(auc_scores_model_3)
-    mean_auc_model_4 = np.mean(auc_scores_model_4)
-    mean_auc_model_5 = np.mean(auc_scores_model_5)
-
-    # print(f"Model 1 Mean ROC AUC: {mean_auc_model_1:.4f}")
-    print(f"Model 2 Mean AUC Score: {mean_auc_model_2:.4f}")
-    print(f"Model 3 Mean AUC: {mean_auc_model_3:.4f}")
-    print(f"Model 4 Mean AUC: {mean_auc_model_4:.4f}")
-    print(f"Model 5 Mean AUC: {mean_auc_model_5:.4f}")
+    print(f"Model 2 Mean AUC: {np.mean(auc_scores_model_2):.4f}")
+    print(f"Model 3 Mean AUC: {np.mean(auc_scores_model_3):.4f}")
+    print(f"Model 4 Mean AUC: {np.mean(auc_scores_model_4):.4f}")
+    print(f"Model 5 Mean AUC: {np.mean(auc_scores_model_5):.4f}")

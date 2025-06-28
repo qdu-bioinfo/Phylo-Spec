@@ -21,13 +21,13 @@ def set_seed(seed):
 set_seed(42)
 
 in_feature=1800
-abundance_file = 'csv'     #csv
-tree_file = 'nwk'                # nwk
+abundance_file = r'F:\肠道\课题\BIB审稿重新做的结果\特征重要性37分\Syn1\Group_20\Group_20_abundance.csv'     #csv
+tree_file = r'F:\肠道\课题\BIB审稿重新做的结果\特征重要性37分\Syn1\Group_20\Group_20_subtree.nwk'                # nwk
 output_prefix = 'output'
 output_xlsx = "prediction_results.xlsx"
 output_label_map = "label_encoding_mapping.csv"
 n_splits = 5
-epochs = 100
+epochs = 1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 df = pd.read_csv(abundance_file, index_col=0)
