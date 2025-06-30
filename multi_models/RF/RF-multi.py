@@ -1,3 +1,4 @@
+import argparse
 import os
 import pandas as pd
 import numpy as np
@@ -14,6 +15,10 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 random.seed(42)
 np.random.seed(42)
+parser = argparse.ArgumentParser(description="Load a CSV file via command line.")
+parser.add_argument('-c', '--csv', required=True, help='Path to the input CSV file')
+args = parser.parse_args()
+
 
 # output folde
 output_folder = r'output_folder'
@@ -21,7 +26,7 @@ if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
 # input
-csv_path = r'csv'
+csv_path = args.csv
 data = pd.read_csv(csv_path)
 
 

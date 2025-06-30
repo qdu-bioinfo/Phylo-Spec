@@ -2,6 +2,8 @@
 
 Run all SOTA models using Multi-comparison-models.py.
 
+For a single disease:
+
 *i.* **Model 5 CNN** and **Model 2 RF** No additional input is required, only '-c', '--csv', type=str, required=True, help='Path to input CSV file'
 
 *ii.* **Model 4 DeepPhylo** requires input of 3 'npy' files ' X.npy' , 'Y.npy' and 'embedding.npy'.
@@ -32,4 +34,19 @@ python Multi-comparison-models.py \
 
 
 
+For multiple diseases: Each model has multiple diseases in its own file.
+
+For example：**Model 5 CNN** in **CNN-multi.py** in the CNN folder in the multi_models folder
+
+**Model 4 DeepPhylo** in **main_all-multi.py** in DeepPhylo folder in multi_models folder
+
+**Model 1 MetaDR** in **MetaDR.py** in MetaDR folder in multi_models folder
+
+**Model 3 PM-CNN** in **PMCNN-multi.py** in PM-CNN folder in multi_models folder
+
+Input and usage are the same as those for single diseases above.
+
 Note: For MetaDR and PM-CNN, the dimension of the first layer 'nn.Linear' input after 'nn.Flatten()' is not automatic and needs to be modified manually.
+
+
+

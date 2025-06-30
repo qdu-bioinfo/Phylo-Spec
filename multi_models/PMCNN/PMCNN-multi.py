@@ -1,3 +1,5 @@
+import argparse
+
 import pandas as pd
 import numpy as np
 import torch
@@ -179,10 +181,14 @@ def run_model_3_train(X, y, train_idx, val_idx):
     return auc_score, all_labels, all_preds
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Process input CSV files.")
+    parser.add_argument('-c', required=True, help='Path to main CSV file')
+    parser.add_argument('-list', required=True, help='Path to list CSV file')
+    args = parser.parse_args()
     set_seed(42)
 
-    csv_path = r'csv'
-    list_path = r'list.csv
+    csv_path = args.c
+    list_path = args.list
 
     data3 = pd.read_csv(csv_path)
     sample_names = data3.iloc[:, 0].values
@@ -229,52 +235,5 @@ if __name__ == '__main__':
     print(f"\nMean AUC for Model 3: {np.mean(auc_scores_model_3):.4f}")
     print(f"Average Cohen's Kappa across folds: {avg_kappa:.4f}")
     print(f"Overall Cohen's Kappa: {overall_kappa:.4f}")
-
-    results_df = pd.DataFrame({
-        'Sample_Name': aggregated_sample_names,
-        'True_Label': aggregated_true,
-        'Predicted_Label': np.argmax(aggregated_preds, axis=1)
-    })
-
-    for cls in range(aggregated_preds.shape[1]):
-        results_df[f'Prob_Class_{cls}'] = aggregated_preds[:, cls]
-
-    results_excel_path = 'all_samples_predictions.xlsx'
-    results_df.to_excel(results_excel_path, index=False)
-    print(f"\nAll samples predictions saved to: {results_excel_path}")
-
-    n_classes = int(np.max(aggregated_true)) + 1
-    aggregated_true_bin = label_binarize(aggregated_true, classes=list(range(n_classes)))
-
-    plt.figure(figsize=(10, 8))
-    for i in range(n_classes):
-        fpr, tpr, _ = roc_curve(aggregated_true_bin[:, i], aggregated_preds[:, i])
-        roc_auc = auc(fpr, tpr)
-        plt.plot(fpr, tpr, lw=2, label=f'Class {i} (AUC = {roc_auc:.4f})')
-    plt.plot([0, 1], [0, 1], linestyle='--', color='gray', lw=2)
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Multi-class ROC Curves')
-    plt.legend(loc="lower right")
-
-    plt.savefig("roc_curve.pdf", format="pdf")
-    plt.close()
-    print("ROC curve saved as roc_curve.pdf")
-
-
-    roc_data = {}
-    for i in range(n_classes):
-        fpr, tpr, _ = roc_curve(aggregated_true_bin[:, i], aggregated_preds[:, i])
-        roc_auc = auc(fpr, tpr)
-        roc_data[f'FPR_Class_{i}'] = fpr
-        roc_data[f'TPR_Class_{i}'] = tpr
-        roc_data[f'AUC_Class_{i}'] = [roc_auc] * len(fpr)
-
-    roc_df = pd.DataFrame(roc_data)
-    roc_excel_path = 'roc_data.xlsx'
-    roc_df.to_excel(roc_excel_path, index=False)
-    print(f"ROC data saved to: {roc_excel_path}")
 
     print("\nAll analysis completed successfully!")

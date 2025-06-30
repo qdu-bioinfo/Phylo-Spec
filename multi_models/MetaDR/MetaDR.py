@@ -1,3 +1,5 @@
+import argparse
+
 import pandas as pd
 import numpy as np
 import time
@@ -20,9 +22,14 @@ def set_seed(seed):
 
 set_seed(42)
 
+parser = argparse.ArgumentParser(description="Run phylogenetic model with input files.")
+parser.add_argument('-c', '--abundance', required=True, help='Path to abundance CSV file')
+parser.add_argument('-t', '--tree', required=True, help='Path to Newick tree file (.nwk)')
+args = parser.parse_args()
+
 in_feature=1800
-abundance_file = r'F:\肠道\课题\BIB审稿重新做的结果\特征重要性37分\Syn1\Group_20\Group_20_abundance.csv'     #csv
-tree_file = r'F:\肠道\课题\BIB审稿重新做的结果\特征重要性37分\Syn1\Group_20\Group_20_subtree.nwk'                # nwk
+abundance_file = args.c
+tree_file = args.t
 output_prefix = 'output'
 output_xlsx = "prediction_results.xlsx"
 output_label_map = "label_encoding_mapping.csv"
