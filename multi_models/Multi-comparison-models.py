@@ -395,7 +395,7 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding):
     return val_true_labels[best_epoch], val_pred_labels[best_epoch]
 
 # model4-DeepPhylo
-def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=64, lr=1e-4, hidden_size=32,
+def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=1024, lr=1e-4, hidden_size=32,
           kernal_size_conv=13, kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     criterion = nn.BCELoss()
@@ -650,7 +650,7 @@ if __name__ == '__main__':
         auc_scores_model_4.append(auc4)
 
         # Model 5
-        auc5, y5_true, y5_pred = run_cnn_train(X5, y5_encoded, train_idx, val_idx, input_dim=num_columns, output_dim=1, batch_size=64, epochs=10)
+        auc5, y5_true, y5_pred = run_cnn_train(X5, y5_encoded, train_idx, val_idx, input_dim=num_columns, output_dim=1, batch_size=1024, epochs=10)
         all_fold_roc_data['model_5']['true_labels'].append(y5_true)
         all_fold_roc_data['model_5']['pred_scores'].append(y5_pred)
         auc_scores_model_5.append(auc5)
