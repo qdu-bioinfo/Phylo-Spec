@@ -395,7 +395,7 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding):
     return val_true_labels[best_epoch], val_pred_labels[best_epoch]
 
 # model4-DeepPhylo
-def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=32, lr=1e-4, hidden_size=32,
+def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=64, lr=1e-4, hidden_size=32,
           kernal_size_conv=13, kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     criterion = nn.BCELoss()
