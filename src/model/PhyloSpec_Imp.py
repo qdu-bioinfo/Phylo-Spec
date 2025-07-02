@@ -147,7 +147,7 @@ def main():
 
     # Step 3: normalize scores and save to Excel
     importance_df = pd.DataFrame.from_dict(importance_scores, orient='index', columns=['Importance'])
-    importance_df['Importance'] = 1 - importance_df['Importance']  # Invert scores: higher = more important
+    # importance_df['Importance'] = 1 - importance_df['Importance']
     importance_df['Importance'] = importance_df['Importance'] / importance_df['Importance'].sum()
 
     leaf_nodes = [node for node in node_features_normalized.keys() if node not in node_relations.keys()]
