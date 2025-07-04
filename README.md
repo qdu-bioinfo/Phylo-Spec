@@ -13,7 +13,7 @@
   - [a. Normal status](#a-normal-status)
   - [b. Unclassified status](#b-unclassified-status)
   - [c. Five cross validation](#c-five-cross-validation)
-  - [d. Phylo-Spec Multi-disease Classification](#d-phylo-spec-multi-disease-classification)
+  - [d. Phylo-Spec multi-disease classification](#d-phylo-spec-multi-disease-classification)
   - [e. Phylo-Spec Importance](#e-phylo-spec-importance)
 - [Run the example with one click](#run-the-example-with-one-click)
 - [Supplementary](#supplementary)
@@ -59,11 +59,25 @@ WGS_Phlyogeny.py // For model obtaining metagenomic phylogenetic trees
 
 ## Instructions
 
-If building a phylogenetic tree is very time-consuming, we recommend that you use the reference databases that come with the software, GreenGenes13.8, GreenGenes 2, MetaPhlAn3, MetaPhlAn4.
+If building a phylogenetic tree is very time-consuming, it is recommended that you use the reference database that comes with the software, as follows: 
 
-_i_. For 16S rRNA data, we recommend using the phylogenetic tree in the GreenGenes database that is widely accepted by the community. The bacterial taxonomic unit OTU can be directly mapped to the tree structure through the annotation name. Specific usage: " -t ./database/16S/gg13.nwk "
 
-_ii_. For WGS (Whole Genome Shotgun) metagenomic data, we recommend using the species annotation system and corresponding phylogenetic tree provided by MetaPhlAn. Specific usage: " -t ./database/WGS/wgs_mpa4_phylogeny.nwk "
+
+*i.* For 16S/18S rRNA sequencing data, we recommended using the widely adopted phylogenetic tree from the GreenGenes13_8, GreenGenes2, GreenGenes13_8_99%, Oral Core Microbiome, SILVA_16s, SILVA_18s database, where microbial units (OTUs) could be directly mapped onto the tree structure based on their annotated taxonomic names. Specific usage: " -t ./database/16S/gg13.nwk "
+
+
+
+*ii.* For whole-genome shotgun (WGS) metagenomic data, we recommended using the MetaPhlAn3, MetaPhlAn4, RefSeq taxonomy and its corresponding reference phylogenetic tree, which provided species-level resolution with well-curated evolutionary relationships. Specific usage: " -t ./database/WGS/wgs_mpa4_phylogeny.nwk "
+
+
+
+For 16S and WGS, by mapping these unclassified species to virtual nodes, Phylo-Spec minimized the potential bias introduced by missing or incomplete data, ensuring that these species did not interfere with the classification process. This approach allowed unclassified or low-resolution species to be effectively incorporated into the phylogenetic framework without disrupting the integrity of the phylogeny. This technique preserved the overall structure of the phylogenetic hierarchy, enhancing the robustness of microbiome-based classification.
+
+
+
+This design eliminated the need for de novo tree reconstruction for each batch of samples, thereby reducing computational overhead while improving the reusability and generalizability of the method.
+
+
 
 Otherwise, you can refer to the following method to build a phylogenetic tree
 
@@ -172,7 +186,7 @@ Shape: List[Tuple[np.ndarray, np.ndarray]], typically from StratifiedKFold.split
 ```
 python ./src/model/PhyloSpec_cv.py -t ./example/CV/phylogeny.nwk -c ./example/CV/example_cv.csv -taxo ./example/CV/example_taxonomy.csv --PhyloSpec cv
 ```
-### d. Phylo-Spec Multi-disease Classification
+### d. Phylo-Spec multi-disease classification
 
 Phylo-Spec can automatically identify multiple disease types. Its usage and input are exactly the same as the above function, except that the number of host state types must be greater than 2. The input sample is as follows:
 
