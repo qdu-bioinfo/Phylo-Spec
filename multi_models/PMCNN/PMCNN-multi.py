@@ -155,7 +155,7 @@ def run_model_3_train(X, y, train_idx, val_idx):
     optimizer = optim.Adam(model.parameters(), lr=0.0001,weight_decay=0.0001)
 
     model.train()
-    for epoch in range(5):
+    for epoch in range(10):
         for inputs, labels in train_loader:
             x1, x2, x3, x4 = inputs
             outputs = model(x1, x2, x3, x4)

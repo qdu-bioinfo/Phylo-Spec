@@ -12,8 +12,8 @@ from sklearn.metrics import roc_auc_score, roc_curve, auc, cohen_kappa_score
 import pandas as pd
 import matplotlib.pyplot as plt
 from itertools import cycle
-from multi_models.DeepPhylo.deepphylo.pre_dataset import DeepPhyDataset
-from multi_models.DeepPhylo.deepphylo.model import DeepPhylo_ibd as DeepPhylo
+from DeepPhylo.deepphylo.pre_dataset import DeepPhyDataset
+from DeepPhylo.deepphylo.model import DeepPhylo_ibd as DeepPhylo
 
 
 def set_seed(seed):
@@ -189,23 +189,21 @@ def select_best_epoch(val_losses):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run CNN training with .npy files")
-    parser.add_argument('-x', required=True, help='Path to X .npy file')
-    parser.add_argument('-y', required=True, help='Path to y .npy file')
-    parser.add_argument('-embedding', required=True, help='Path to embedding .npy file')
-
+    parser.add_argument('-xnpy', required=True, help='Path to X .npy file')
+    parser.add_argument('-ynpy', required=True, help='Path to y .npy file')
+    parser.add_argument('-embed', required=True, help='Path to embedding .npy file')
     args = parser.parse_args()
+
     set_seed(42)
 
-    X_path = r'/Users/bioinfo/Desktop/after_batch_merged_data_no90%_去0样本2_X.npy'
-    y_path = r'/Users/bioinfo/Desktop/after_batch_merged_data_no90%_去0样本2_y.npy'
-    embedding_path = r'/Users/bioinfo/Desktop/mutl_class_embeding.npy'
+    # Load inputs
+    X4 = np.load(args.xnpy)
+    y4 = np.load(args.ynpy)
+    phy_embedding = np.load(args.embed)
 
-
-    X4 = np.load(args.x)
-    y4 = np.load(args.y)
-    phy_embedding = np.load(args.embedding)
-
-    sample_names = pd.read_csv(y_path.replace('.npy', '.csv')).iloc[:, 0].values
+    # Load sample names (assumes a CSV with same name as y.npy)
+    y_csv_path = args.y.replace('.npy', '.csv')
+    sample_names = pd.read_csv(y_csv_path).iloc[:, 0].values
 
     n_classes = len(np.unique(y4))
     print(f"Number of classes: {n_classes}")
@@ -236,15 +234,12 @@ if __name__ == '__main__':
         all_sample_names.extend(fold_sample_names)
 
         if n_classes > 2:
-
             y_true_bin = label_binarize(true_labels, classes=np.arange(n_classes))
             fold_auc = roc_auc_score(y_true_bin, pred_probs, multi_class='ovr')
-
             plot_filename = f"roc_curve_fold_{fold + 1}.pdf"
             plot_multiclass_roc(true_labels, pred_probs, n_classes, plot_filename)
             print(f"ROC curve saved as {plot_filename}")
         else:
-
             fold_auc = roc_auc_score(true_labels, pred_probs[:, 1])
 
         auc_scores_model_4.append(fold_auc)

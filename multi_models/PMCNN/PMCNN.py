@@ -1,17 +1,18 @@
-# PM-CNN
+import argparse
 import torch
 import numpy as np
 import pandas as pd
 import torch.nn as nn
 from imblearn.over_sampling import SMOTE
-from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score, roc_auc_score, cohen_kappa_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, cohen_kappa_score
 from torch import optim
 import torch.nn.functional as F
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 import random
 
+# -------- Utility functions --------
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -21,81 +22,16 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-seed = 42
-set_seed(seed)
-
-torch.autograd.set_detect_anomaly(True)
-
-class MyDataset(Dataset):
-    def __init__(self, x1, x2, x3, x4, y):
-        self.x1 = x1
-        self.x2 = x2
-        self.x3 = x3
-        self.x4 = x4
-        self.y = y
-
-    def __len__(self):
-        return len(self.y)
-
-    def __getitem__(self, index):
-        return (self.x1[index], self.x2[index], self.x3[index], self.x4[index]), self.y[index]
-
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        self.conv1_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv1_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv2_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv2_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv3_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv3_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv4_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv4_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.bn1 = nn.BatchNorm1d(num_features=64)
-        self.fc1 = nn.Linear(2816, 64)  # Adjust based on input size after conv layers
-        self.fc2 = nn.Linear(64, 2)  # Number of classes, adjust based on dataset
-
-    def conv_block(self, x, conv1, conv2):
-        x = F.tanh(conv1(x))
-        x = nn.BatchNorm1d(num_features=16)(x)
-        x = F.tanh(conv2(x))
-        x = nn.BatchNorm1d(num_features=16)(x)
-        return x
-
-    def forward(self, x1, x2, x3, x4):
-        x1 = x1.reshape(-1, 1, x1.size(1))
-        x2 = x2.reshape(-1, 1, x2.size(1))
-        x3 = x3.reshape(-1, 1, x3.size(1))
-        x4 = x4.reshape(-1, 1, x4.size(1))
-
-        x1 = self.conv_block(x1, self.conv1_1, self.conv1_2)
-        x2 = self.conv_block(x2, self.conv2_1, self.conv2_2)
-        x3 = self.conv_block(x3, self.conv3_1, self.conv3_2)
-        x4 = self.conv_block(x4, self.conv4_1, self.conv4_2)
-
-        x1 = x1.view(x1.size(0), -1)
-        x2 = x2.view(x2.size(0), -1)
-        x3 = x3.view(x3.size(0), -1)
-        x4 = x4.view(x4.size(0), -1)
-        x = torch.cat((x1, x2, x3, x4), dim=1)
-        x = self.fc1(x)
-        x = self.bn1(x)
-        x = F.tanh(x)
-        x = F.softmax(self.fc2(x), dim=1)
-
-        return x
-
 def int_str(clustered_groups):
     MyFea_df = pd.read_csv(clustered_groups)
     row_list = [[] for _ in range(MyFea_df.shape[0])]
     for index, row in MyFea_df.iterrows():
-        row_list[index] = list(row)
-        row_list[index] = list(map(str, row_list[index]))
+        row_list[index] = list(map(str, list(row)))
     return row_list
 
-def load_data(otu_table, meta_file, My_list):
-    X = pd.read_csv(otu_table, index_col=0)
-    y = pd.read_csv(meta_file, index_col=0)
+def load_data(otu_table_path, meta_file_path, My_list):
+    X = pd.read_csv(otu_table_path, index_col=0)
+    y = pd.read_csv(meta_file_path, index_col=0)
     y = y.iloc[:, 0].values
 
     encoder = LabelEncoder()
@@ -109,18 +45,55 @@ def load_data(otu_table, meta_file, My_list):
 
     data_list = [x1, x2, x3, x4]
     for i in range(len(data_list)):
-        data_list[i] = np.array(data_list[i], dtype=np.float32)
-        data_list[i] = torch.FloatTensor(data_list[i])
+        data_list[i] = torch.FloatTensor(np.array(data_list[i], dtype=np.float32))
 
     return data_list, y
 
+# -------- Model & Dataset --------
+class MyDataset(Dataset):
+    def __init__(self, x1, x2, x3, x4, y):
+        self.x1, self.x2, self.x3, self.x4, self.y = x1, x2, x3, x4, y
+    def __len__(self): return len(self.y)
+    def __getitem__(self, index): return (self.x1[index], self.x2[index], self.x3[index], self.x4[index]), self.y[index]
+
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.conv1_1 = nn.Conv1d(1, 16, kernel_size=8, stride=6, padding=1)
+        self.conv1_2 = nn.Conv1d(16, 16, kernel_size=8, stride=6, padding=1)
+        self.conv2_1 = nn.Conv1d(1, 16, kernel_size=8, stride=6, padding=1)
+        self.conv2_2 = nn.Conv1d(16, 16, kernel_size=8, stride=6, padding=1)
+        self.conv3_1 = nn.Conv1d(1, 16, kernel_size=8, stride=6, padding=1)
+        self.conv3_2 = nn.Conv1d(16, 16, kernel_size=8, stride=6, padding=1)
+        self.conv4_1 = nn.Conv1d(1, 16, kernel_size=8, stride=6, padding=1)
+        self.conv4_2 = nn.Conv1d(16, 16, kernel_size=8, stride=6, padding=1)
+        self.bn1 = nn.BatchNorm1d(64)
+        self.fc1 = nn.Linear(2816, 64)
+        self.fc2 = nn.Linear(64, 2)
+
+    def conv_block(self, x, conv1, conv2):
+        x = F.tanh(conv1(x))
+        x = nn.BatchNorm1d(16)(x)
+        x = F.tanh(conv2(x))
+        x = nn.BatchNorm1d(16)(x)
+        return x
+
+    def forward(self, x1, x2, x3, x4):
+        x1 = self.conv_block(x1.unsqueeze(1), self.conv1_1, self.conv1_2).view(x1.size(0), -1)
+        x2 = self.conv_block(x2.unsqueeze(1), self.conv2_1, self.conv2_2).view(x2.size(0), -1)
+        x3 = self.conv_block(x3.unsqueeze(1), self.conv3_1, self.conv3_2).view(x3.size(0), -1)
+        x4 = self.conv_block(x4.unsqueeze(1), self.conv4_1, self.conv4_2).view(x4.size(0), -1)
+        x = torch.cat((x1, x2, x3, x4), dim=1)
+        x = F.tanh(self.bn1(self.fc1(x)))
+        return F.softmax(self.fc2(x), dim=1)
+
+# -------- Training & Evaluation --------
 def train_model(model, criterion, optimizer, train_loader, epoch):
     model.train()
-    for epoch in range(epoch):
-        for i, data in enumerate(train_loader):
-            inputs, labels = data
-            x_train1, x_train2, x_train3, x_train4 = inputs
-            y_pred = model(x_train1, x_train2, x_train3, x_train4)
+    for _ in range(epoch):
+        for inputs, labels in train_loader:
+            x1, x2, x3, x4 = inputs
+            y_pred = model(x1, x2, x3, x4)
             loss = criterion(y_pred, labels)
             optimizer.zero_grad()
             loss.backward()
@@ -128,85 +101,82 @@ def train_model(model, criterion, optimizer, train_loader, epoch):
 
 def evaluate_model(model, test_loader):
     model.eval()
-    all_preds = []
-    all_labels = []
-    all_probs = []
+    all_preds, all_labels, all_probs = [], [], []
     with torch.no_grad():
-        for i, data in enumerate(test_loader):
-            inputs, labels = data
-            x_test1, x_test2, x_test3, x_test4 = inputs
-            outputs = model(x_test1, x_test2, x_test3, x_test4)
+        for inputs, labels in test_loader:
+            x1, x2, x3, x4 = inputs
+            outputs = model(x1, x2, x3, x4)
             probs = F.softmax(outputs, dim=1)
-            preds = torch.max(outputs, dim=1)[1]
+            preds = torch.argmax(outputs, dim=1)
             all_probs.extend(probs.numpy())
             all_preds.extend(preds.numpy())
             all_labels.extend(labels.numpy())
 
     all_probs = np.array(all_probs)
-    all_labels = np.array(all_labels)
-    all_preds = np.array(all_preds)
+    auc_score = roc_auc_score(all_labels, all_probs[:, 1]) if len(np.unique(all_labels)) > 1 else float('nan')
 
-    unique_classes = np.unique(all_labels)
-    if len(unique_classes) == 1:
-        print("Only one class present in y_true. ROC AUC score is not defined in that case.")
-        auc_score = float('nan')
-    else:
-        auc_score = roc_auc_score(all_labels, all_probs[:, 1])
+    return {
+        "accuracy": accuracy_score(all_labels, all_preds),
+        "precision": precision_score(all_labels, all_preds, average='weighted'),
+        "recall": recall_score(all_labels, all_preds, average='weighted'),
+        "f1": f1_score(all_labels, all_preds, average='weighted'),
+        "auc": auc_score,
+        "kappa": cohen_kappa_score(all_labels, all_preds)
+    }
 
-    accuracy = accuracy_score(all_labels, all_preds)
-    precision = precision_score(all_labels, all_preds, average='weighted')
-    recall = recall_score(all_labels, all_preds, average='weighted')
-    f1 = f1_score(all_labels, all_preds, average='weighted')
-    kappa = cohen_kappa_score(all_labels, all_preds)
+# -------- Main Entry --------
+def main(csv_path, list_path):
+    set_seed(42)
+    My_list = int_str(list_path)
 
-    print("Test AUC: {:.4f}".format(auc_score))
-    print("Test Kappa: {:.4f}".format(kappa))
+    data = pd.read_csv(csv_path)
+    X = data.iloc[:, 1:-1]
+    y = data.iloc[:, [-1]]
+    X.to_csv("temp_features.csv")
+    y.to_csv("temp_labels.csv")
 
+    data_list, y_tensor = load_data("temp_features.csv", "temp_labels.csv", My_list)
+    X_cat = torch.cat(data_list, dim=1)
 
-    return accuracy, precision, recall, f1, auc_score, kappa
-
-def main():
-    data = pd.read_csv("csv")
-    My_list = int_str('csv')
-
-
-    data_list, y = load_data(data.iloc[:,1:-1], data.iloc[:,-1], My_list)
-    X = torch.cat(data_list, dim=1)
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y, random_state=35)
+    X_train, X_test, y_train, y_test = train_test_split(X_cat, y_tensor, test_size=0.3, stratify=y_tensor, random_state=35)
 
     smote = SMOTE(random_state=42)
-    X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
-
+    X_train_np, y_train_np = smote.fit_resample(X_train, y_train)
     scaler = StandardScaler()
-    X_train_smote = scaler.fit_transform(X_train_smote)
-    X_test = scaler.transform(X_test)
+    X_train_np = scaler.fit_transform(X_train_np)
+    X_test_np = scaler.transform(X_test)
 
-    X_train_smote = torch.tensor(X_train_smote, dtype=torch.float32)
-    X_test = torch.tensor(X_test, dtype=torch.float32)
+    X_train_tensor = torch.tensor(X_train_np, dtype=torch.float32)
+    X_test_tensor = torch.tensor(X_test_np, dtype=torch.float32)
+    y_train_tensor = torch.tensor(y_train_np, dtype=torch.long)
 
-    train_dataset = MyDataset(X_train_smote[:, :X_train_smote.shape[1] // 4],
-                              X_train_smote[:, X_train_smote.shape[1] // 4:X_train_smote.shape[1] // 2],
-                              X_train_smote[:, X_train_smote.shape[1] // 2:3 * X_train_smote.shape[1] // 4],
-                              X_train_smote[:, 3 * X_train_smote.shape[1] // 4:], y_train_smote)
-    test_dataset = MyDataset(X_test[:, :X_test.shape[1] // 4],
-                             X_test[:, X_test.shape[1] // 4:X_test.shape[1] // 2],
-                             X_test[:, X_test.shape[1] // 2:3 * X_test.shape[1] // 4],
-                             X_test[:, 3 * X_test.shape[1] // 4:], y_test)
+    train_dataset = MyDataset(X_train_tensor[:, :X_train_tensor.shape[1]//4],
+                              X_train_tensor[:, X_train_tensor.shape[1]//4:X_train_tensor.shape[1]//2],
+                              X_train_tensor[:, X_train_tensor.shape[1]//2:3*X_train_tensor.shape[1]//4],
+                              X_train_tensor[:, 3*X_train_tensor.shape[1]//4:], y_train_tensor)
 
+    test_dataset = MyDataset(X_test_tensor[:, :X_test_tensor.shape[1]//4],
+                             X_test_tensor[:, X_test_tensor.shape[1]//4:X_test_tensor.shape[1]//2],
+                             X_test_tensor[:, X_test_tensor.shape[1]//2:3*X_test_tensor.shape[1]//4],
+                             X_test_tensor[:, 3*X_test_tensor.shape[1]//4:], y_test)
 
     train_loader = DataLoader(train_dataset, batch_size=1024, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=1024, shuffle=False)
 
     model = Net()
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-3)
 
-    train_model(model, criterion, optimizer, train_loader, 5)
+    train_model(model, criterion, optimizer, train_loader, epoch=5)
+    results = evaluate_model(model, test_loader)
 
-    accuracy, precision, recall, f1, auc_score, kappa = evaluate_model(model, test_loader)
+    print(f"Test AUC: {results['auc']:.4f}, Test Kappa: {results['kappa']:.4f}")
 
-    print(f"Test AUC: {auc_score:.4f}, Test Kappa: {kappa:.4f}")
-
+# -------- CLI --------
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description="Run PM-CNN on microbial data.")
+    parser.add_argument("-c", "--csv", required=True, help="Path to the input CSV file (feature+label).")
+    parser.add_argument("-list", required=True, help="Path to the CSV file containing feature groupings.")
+
+    args = parser.parse_args()
+    main(args.csv, args.list)

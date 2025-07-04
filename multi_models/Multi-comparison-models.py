@@ -6,9 +6,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 from imblearn.over_sampling import SMOTE
 from Bio import Phylo
-from multi_models.DeepPhylo.deepphylo.model import DeepPhylo_ibd as DeepPhylo
-from multi_models.DeepPhylo.deepphylo.pre_dataset import DeepPhyDataset
-from multi_models.MY.data_processing import load_and_preprocess_data, match_leaf_nodes, assign_unique_names, get_conv_order, \
+from DeepPhylo.deepphylo.model import DeepPhylo_ibd as DeepPhylo
+from DeepPhylo.deepphylo.pre_dataset import DeepPhyDataset
+from data_preprocessing.data_processing import load_and_preprocess_data, match_leaf_nodes, assign_unique_names, get_conv_order, \
     calculate_node_weights, save_node_features_with_pickle, process_unclassified_features
 import pandas as pd
 import numpy as np

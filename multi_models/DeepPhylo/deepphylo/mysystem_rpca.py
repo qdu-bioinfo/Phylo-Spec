@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 from Bio import Phylo
 from skbio import TreeNode
-from multi_models.DeepPhylo.deepphylo.preprocessing import fast_unifrac
-from multi_models.DeepPhylo.deepphylo.plot import reducer
+from DeepPhylo.deepphylo.preprocessing import fast_unifrac
+from DeepPhylo.deepphylo.plot import reducer
 
 
 def import_and_process_data(table_path, tree_path):

@@ -26,7 +26,7 @@ def plot_training(train_losses, val_losses):
     plt.show()
 
 
-def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=32, lr=1e-4, hidden_size=32, kernal_size_conv=13, kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
+def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=1024, lr=1e-4, hidden_size=32, kernal_size_conv=13, kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     criterion = nn.BCELoss()
     batch_size = batch_size
@@ -134,73 +134,30 @@ def random_shuffle(phy_embedding, X_train, X_eval, portion=0.5):
 if __name__ == '__main__':
     set_seed(1234)
 
-    parser = argparse.ArgumentParser(
-        description='Command line tool for IBD diagnosis')
+    parser = argparse.ArgumentParser(description='Minimal CLI for IBD diagnosis')
 
-    parser.add_argument('-hs',
-                        '--hidden_size',
-                        default=16,
-                        type=int,
-                        help='Hidden_size which using in pca dimensionality reduction operation')
-    parser.add_argument('-kec',
-                        '--kernal_size_conv',
-                        default=7,
-                        type=int,
-                        help='Kernal size which applied to convolutional layers')
-    parser.add_argument('-kep',
-                        '--kernal_size_pool',
-                        default=4,
-                        type=int,
-                        help='pooling size of convolutional layers')
-    parser.add_argument('-l',
-                        '--lr',
-                        default=1e-4,
-                        type=float,
-                        help='initial learning rate')
-    parser.add_argument('-bs',
-                        '--batchsize',
-                        default=64,
-                        type=int,
-                        help='Batchsize size when encoding protein embedding with backbone')
-    parser.add_argument('-act',
-                        '--activation',
-                        default='tanh',
-                        choices=['relu', 'sigmoid', 'tanh'],
-                        help='Activation function for encoding protein embedding with backbone (default: relu)')
-    parser.add_argument('-d',
-                        '--dropout',
-                        default=0.5,
-                        type=float,
-                        help='dropout rate of convolutional layers')
-    parser.add_argument('-p',
-                    '--portion_shuffle',
-                    default=0.0,
-                    type=float,
-                    help='proportion of feature embeddings to be shuffled')
+    # Required inputs only
+    parser.add_argument('-xnpy', required=True, help='Path to input X .npy file')
+    parser.add_argument('-ynpy', required=True, help='Path to input y .npy file')
+    parser.add_argument('-embed', required=True, help='Path to input embedding .npy file')
+
     args = parser.parse_args()
 
     # Load data
-    X = np.load(r'C:\Users\91566\Desktop\X_converted.npy')
-    y = np.load(r'C:\Users\91566\Desktop\y_converted.npy')
-    phy_embedding = np.load(r'C:\Users\91566\Desktop\embedding.npy')
+    X = np.load(args.xnpy)
+    y = np.load(args.ynpy)
+    phy_embedding = np.load(args.embed)
 
-    # Generate all combinations of hyperparameters
-    hidden_size = args.hidden_size
-    kernal_size_conv = args.kernal_size_conv
-    kernel_size_pool = args.kernal_size_pool
-    dropout_conv = args.dropout
-    portion = args.portion_shuffle
+    # Fixed hyperparameters
+    hidden_size = 16
+    kernal_size_conv = 7
+    kernel_size_pool = 4
+    dropout_conv = 0.5
+    lr = 1e-4
+    batch_size = 64
+    portion = 0.0
+    activation = nn.Tanh()
 
-    if args.activation == 'relu':
-        activation = nn.ReLU()
-    elif args.activation == 'sigmoid':
-        activation = nn.Sigmoid()
-    elif args.activation == 'tanh':
-        activation = nn.Tanh()
-    else:
-        raise ValueError("Invalid activation function")
-    lr = args.lr
-    batch_size = args.batchsize
 
     # 5-fold cross-validation
     kf = KFold(n_splits=5, shuffle=True, random_state=1234)
