@@ -43,7 +43,7 @@ def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=1024, lr=1
                     activation=activation).to(device)
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     # Training
-    epochs = 200
+    epochs = 5
     patience = 20
     best_val_loss = float("inf")
     counter = 0

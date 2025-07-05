@@ -106,7 +106,7 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding, n_classes):
     return best_true_labels, best_pred_labels, best_pred_probs
 
 def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, n_classes,
-          batch_size=32, lr=1e-4, hidden_size=32, kernal_size_conv=13,
+          batch_size=1024, lr=1e-4, hidden_size=32, kernal_size_conv=13,
           kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     criterion = nn.CrossEntropyLoss()
@@ -126,7 +126,7 @@ def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, n_classes,
                                 n_classes=n_classes).to(device)
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
-    epochs = 10
+    epochs = 5
     patience = 20
     best_val_loss = float("inf")
     counter = 0

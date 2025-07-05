@@ -55,14 +55,14 @@ class MyDataset(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv1_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv2_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv2_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv3_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv3_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv4_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv4_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
+        self.conv1_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv1_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv2_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv2_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv3_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv3_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv4_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv4_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
         self.bn1 = nn.BatchNorm1d(num_features=64)
         self.fc1 = nn.Linear(704, 64)
         self.fc2 = nn.Linear(64, 2)
@@ -336,7 +336,7 @@ def run_model_3_train(X, y, train_idx, val_idx):
 
     model = Net()
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001,weight_decay=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
     model.train()
     for epoch in range(5):
@@ -414,7 +414,7 @@ def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=1024, lr=1
                       activation=activation).to(device)
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
-    epochs = 10
+    epochs = 5
     patience = 20
     best_val_loss = float("inf")
     counter = 0
@@ -650,7 +650,7 @@ if __name__ == '__main__':
         auc_scores_model_4.append(auc4)
 
         # Model 5
-        auc5, y5_true, y5_pred = run_cnn_train(X5, y5_encoded, train_idx, val_idx, input_dim=num_columns, output_dim=1, batch_size=1024, epochs=10)
+        auc5, y5_true, y5_pred = run_cnn_train(X5, y5_encoded, train_idx, val_idx, input_dim=num_columns, output_dim=1, batch_size=1024, epochs=5)
         all_fold_roc_data['model_5']['true_labels'].append(y5_true)
         all_fold_roc_data['model_5']['pred_scores'].append(y5_pred)
         auc_scores_model_5.append(auc5)

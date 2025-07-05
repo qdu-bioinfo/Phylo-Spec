@@ -150,8 +150,8 @@ if __name__ == '__main__':
             X5, y5_encoded, train_idx, val_idx,
             input_dim=num_columns,
             output_dim=num_classes,
-            batch_size=64,
-            epochs=10
+            batch_size=1024,
+            epochs=5
         )
         auc_scores_model_5.append(auc_score)
 

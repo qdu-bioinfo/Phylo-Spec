@@ -41,14 +41,14 @@ class MyDataset(Dataset):
 class Net(nn.Module):
     def __init__(self, num_classes=2):
         super(Net, self).__init__()
-        self.conv1_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv1_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv2_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv2_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv3_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv3_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv4_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=6, padding=1)
-        self.conv4_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=6, padding=1)
+        self.conv1_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv1_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv2_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv2_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv3_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv3_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv4_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
+        self.conv4_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
         self.bn1 = nn.BatchNorm1d(num_features=64)
         self.fc1 = nn.Linear(2368, 64)
         self.fc2 = nn.Linear(64, num_classes)
@@ -155,7 +155,7 @@ def run_model_3_train(X, y, train_idx, val_idx):
     optimizer = optim.Adam(model.parameters(), lr=0.0001,weight_decay=0.0001)
 
     model.train()
-    for epoch in range(10):
+    for epoch in range(5):
         for inputs, labels in train_loader:
             x1, x2, x3, x4 = inputs
             outputs = model(x1, x2, x3, x4)
