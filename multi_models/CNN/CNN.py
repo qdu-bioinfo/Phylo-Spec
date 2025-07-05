@@ -33,7 +33,6 @@ def convolution_block(in_channels, out_channels, kernel_size=3, padding="same"):
         nn.ReLU(inplace=False),
     )
 
-
 class CNNModel(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(CNNModel, self).__init__()
@@ -60,51 +59,57 @@ class CNNModel(nn.Module):
         x = self.fc3(x)
         return x
 
-
-
-def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, epochs):
-
+def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, epochs):
     X_train, X_val = X[train_idx], X[val_idx]
     y_train, y_val = y[train_idx], y[val_idx]
-
 
     X_train = torch.tensor(X_train, dtype=torch.float32).unsqueeze(1)
     X_val = torch.tensor(X_val, dtype=torch.float32).unsqueeze(1)
 
-    y_train = torch.tensor(y_train, dtype=torch.long)
-    y_val = torch.tensor(y_val, dtype=torch.long)
-
+    y_train = torch.tensor(y_train, dtype=torch.float32)
+    y_val = torch.tensor(y_val, dtype=torch.float32)
 
     model = CNNModel(input_dim=input_dim, output_dim=output_dim).to('cpu')
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.0001)
-
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.0001)
 
     train_data = torch.utils.data.TensorDataset(X_train, y_train)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=128, shuffle=True)
 
+    val_data = torch.utils.data.TensorDataset(X_val, y_val)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=64, shuffle=False)
 
     for epoch in range(epochs):
         model.train()
         running_loss = 0.0
         for X_batch, y_batch in train_loader:
             optimizer.zero_grad()
-            outputs = model(X_batch)
-            loss = criterion(outputs, y_batch)
+
+            y_pred = model(X_batch)
+            loss = criterion(y_pred.squeeze(1), y_batch)
+
             loss.backward()
             optimizer.step()
-            running_loss += loss.item()
 
+            running_loss += loss.item()
 
     model.eval()
     with torch.no_grad():
-        y_pred_val = model(X_val)
+        all_pred_probs = []
+        all_true_labels = []
+        for X_batch, y_batch in val_loader:
+            y_pred_val = model(X_batch)
 
-    pred_probs = torch.softmax(y_pred_val, dim=1).cpu().numpy()
+            y_pred_prob = torch.sigmoid(y_pred_val).cpu().numpy()
+            all_pred_probs.extend(y_pred_prob)
+            all_true_labels.extend(y_batch.cpu().numpy())
 
-    auc_score = roc_auc_score(y_val.cpu().numpy(), pred_probs, multi_class="ovr", average="macro")
-    return auc_score, y_val.cpu().numpy(), pred_probs
 
+    y_pred_prob = np.array(all_pred_probs)
+    y_true = np.array(all_true_labels)
+    auc_score = roc_auc_score(y_true, y_pred_prob)
+
+    return auc_score, y_true, y_pred_prob
 
 
 if __name__ == '__main__':
@@ -150,8 +155,7 @@ if __name__ == '__main__':
             X5, y5_encoded, train_idx, val_idx,
             input_dim=num_columns,
             output_dim=num_classes,
-            batch_size=1024,
-            epochs=5
+            epochs=10
         )
         auc_scores_model_5.append(auc_score)
 

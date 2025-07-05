@@ -1,15 +1,13 @@
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, roc_auc_score, \
-    roc_curve,auc
+
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 from imblearn.over_sampling import SMOTE
 from Bio import Phylo
 from DeepPhylo.deepphylo.model import DeepPhylo_ibd as DeepPhylo
 from DeepPhylo.deepphylo.pre_dataset import DeepPhyDataset
-from data_preprocessing.data_processing import load_and_preprocess_data, match_leaf_nodes, assign_unique_names, get_conv_order, \
-    calculate_node_weights, save_node_features_with_pickle, process_unclassified_features
+from data_preprocessing.data_processing import load_and_preprocess_data, match_leaf_nodes, assign_unique_names
 import pandas as pd
 import numpy as np
 import time
@@ -331,15 +329,15 @@ def run_model_3_train(X, y, train_idx, val_idx):
                              X_test[:, X_test.shape[1] // 2:3 * X_test.shape[1] // 4],
                              X_test[:, 3 * X_test.shape[1] // 4:], y_test)
 
-    train_loader = DataLoader(train_dataset, batch_size=1024, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=1024, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     model = Net()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
     model.train()
-    for epoch in range(5):
+    for epoch in range(10):
         for i, data in enumerate(train_loader):
             inputs, labels = data
             x_train1, x_train2, x_train3, x_train4 = inputs
@@ -359,9 +357,8 @@ def run_model_3_train(X, y, train_idx, val_idx):
             x_test1, x_test2, x_test3, x_test4 = inputs
             outputs = model(x_test1, x_test2, x_test3, x_test4)
 
-            # Get the probability of class 1
-            probs = torch.softmax(outputs, dim=1)  # Apply softmax to get probabilities
-            preds = probs[:, 1]  # Get the probability of class 1
+            probs = torch.softmax(outputs, dim=1)
+            preds = probs[:, 1]
 
             all_preds.extend(preds.numpy())
             all_labels.extend(labels.numpy())
@@ -369,7 +366,6 @@ def run_model_3_train(X, y, train_idx, val_idx):
     all_labels = np.array(all_labels)
     all_preds = np.array(all_preds)
 
-    # Calculate the AUC score based on the predicted probabilities
     auc_score = roc_auc_score(all_labels, all_preds)
 
     return auc_score, all_labels, all_preds
@@ -381,7 +377,6 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding):
     X_train, X_eval = X[train_idx], X[val_idx]
     y_train, y_eval = y[train_idx], y[val_idx]
 
-
     smote = SMOTE(random_state=42)
     X_train, y_train = smote.fit_resample(X_train, y_train)
     scaler = StandardScaler()
@@ -389,55 +384,74 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding):
     X_eval = scaler.transform(X_eval)
 
 
-    train_losses, val_losses, val_true_labels, val_pred_labels = train(X_train, y_train, X_eval, y_eval, phy_embedding)
+    train_losses, val_losses, val_true_labels, val_pred_labels = train(
+        X_train, y_train, X_eval, y_eval, phy_embedding,
+        train_batch_size=128, val_batch_size=64,
+        lr=0.0001, hidden_size=32,
+        kernal_size_conv=13, kernel_size_pool=4,
+        dropout_conv=0.2, activation=nn.LeakyReLU())
     best_epoch = select_best_epoch(val_losses)
 
     return val_true_labels[best_epoch], val_pred_labels[best_epoch]
 
 # model4-DeepPhylo
-def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=1024, lr=1e-4, hidden_size=32,
-          kernal_size_conv=13, kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
+def train(X_train, Y_train, X_eval, Y_eval, phy_embedding,
+          train_batch_size=128, val_batch_size=64,
+          lr=1e-4, hidden_size=32, kernal_size_conv=13,
+          kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     criterion = nn.BCELoss()
-    train_dataset = DeepPhyDataset(phy_embedding, X_train, Y_train)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
-                              collate_fn=train_dataset.custom_collate_fn)
-    val_dataset = DeepPhyDataset(phy_embedding, X_eval, Y_eval)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,
-                            collate_fn=train_dataset.custom_collate_fn)
 
-    model = DeepPhylo(hidden_size=hidden_size,
-                      embeddings=train_dataset.embeddings,
-                      kernel_size_conv=kernal_size_conv,
-                      kernel_size_pool=kernel_size_pool,
-                      dropout_conv=dropout_conv,
-                      activation=activation).to(device)
+    train_dataset = DeepPhyDataset(phy_embedding, X_train, Y_train)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=train_batch_size,
+        shuffle=True,
+        collate_fn=train_dataset.custom_collate_fn
+    )
+
+    val_dataset = DeepPhyDataset(phy_embedding, X_eval, Y_eval)
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=val_batch_size,
+        shuffle=False,
+        collate_fn=train_dataset.custom_collate_fn
+    )
+
+    model = DeepPhylo(
+        hidden_size=hidden_size,
+        embeddings=train_dataset.embeddings,
+        kernel_size_conv=kernal_size_conv,
+        kernel_size_pool=kernel_size_pool,
+        dropout_conv=dropout_conv,
+        activation=activation
+    ).to(device)
+
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
-    epochs = 5
-    patience = 20
+    epochs = 10
+    patience = 1
     best_val_loss = float("inf")
     counter = 0
-
     train_losses = []
     val_losses = []
     val_pred_labels = []
     val_true_labels = []
 
     for epoch in range(epochs):
+
         model.train()
         train_loss = 0.0
         for batch in train_loader:
             batch = {key: val.to(device) for key, val in batch.items()}
             optimizer.zero_grad()
-            y_pred_train = model(batch['X'], batch['nonzero_indices'])
-            y_pred_train = y_pred_train.squeeze(dim=1)
+            y_pred_train = model(batch['X'], batch['nonzero_indices']).squeeze(dim=1)
             loss_train = criterion(y_pred_train, batch['y'])
             loss_train.backward()
             optimizer.step()
             train_loss += loss_train.item() * batch['X'].size(0)
-
         train_loss /= len(train_loader.dataset)
+
         model.eval()
         val_loss = 0.0
         val_preds = []
@@ -446,13 +460,12 @@ def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=1024, lr=1
             for batch in val_loader:
                 y_val.append(batch['y'].numpy())
                 batch = {key: val.to(device) for key, val in batch.items()}
-                y_pred_val = model(batch['X'], batch['nonzero_indices'])
-                y_pred_val = y_pred_val.squeeze(dim=1)
+                y_pred_val = model(batch['X'], batch['nonzero_indices']).squeeze(dim=1)
                 loss_val = criterion(y_pred_val, batch['y'])
                 val_loss += loss_val.item() * batch['X'].size(0)
                 val_preds.append(y_pred_val.detach().cpu().numpy())
-
         val_loss /= len(val_loader.dataset)
+
         y_val = np.concatenate(y_val)
         val_preds = np.concatenate(val_preds)
         val_pred_labels.append(val_preds)
@@ -460,13 +473,13 @@ def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, batch_size=1024, lr=1
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
-
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             counter = 0
         else:
             counter += 1
             if counter >= patience:
+                print(f"Early stopping at epoch {epoch}")
                 break
 
     del model, optimizer
@@ -483,7 +496,7 @@ def convolution_block(in_channels, out_channels, kernel_size=3, padding="same"):
     return nn.Sequential(
         nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, padding=padding),
         nn.BatchNorm1d(out_channels),
-        nn.Dropout(p=0.8),
+        nn.Dropout(p=0.5),
         nn.ReLU(inplace=False),
     )
 
@@ -514,7 +527,7 @@ class CNNModel(nn.Module):
         return x
 
 # model5-CNN
-def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, epochs):
+def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, epochs):
     X_train, X_val = X[train_idx], X[val_idx]
     y_train, y_val = y[train_idx], y[val_idx]
 
@@ -524,14 +537,15 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, e
     y_train = torch.tensor(y_train, dtype=torch.float32)
     y_val = torch.tensor(y_val, dtype=torch.float32)
 
-
     model = CNNModel(input_dim=input_dim, output_dim=output_dim).to('cpu')
     criterion = nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001,weight_decay=0.0001)
-
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.0001)
 
     train_data = torch.utils.data.TensorDataset(X_train, y_train)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=128, shuffle=True)
+
+    val_data = torch.utils.data.TensorDataset(X_val, y_val)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=64, shuffle=False)
 
     for epoch in range(epochs):
         model.train()
@@ -549,13 +563,20 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, e
 
     model.eval()
     with torch.no_grad():
-        y_pred_val = model(X_val)
-        val_loss = criterion(y_pred_val.squeeze(), y_val)
+        all_pred_probs = []
+        all_true_labels = []
+        for X_batch, y_batch in val_loader:
+            y_pred_val = model(X_batch)
 
-    y_pred_prob = torch.sigmoid(y_pred_val).cpu().numpy()
-    auc_score = roc_auc_score(y_val.cpu().numpy(), y_pred_prob)
+            y_pred_prob = torch.sigmoid(y_pred_val).cpu().numpy()
+            all_pred_probs.extend(y_pred_prob)
+            all_true_labels.extend(y_batch.cpu().numpy())
 
-    return auc_score, y_val, y_pred_prob
+    y_pred_prob = np.array(all_pred_probs)
+    y_true = np.array(all_true_labels)
+    auc_score = roc_auc_score(y_true, y_pred_prob)
+
+    return auc_score, y_true, y_pred_prob
 
 warnings.filterwarnings('ignore')
 
@@ -650,7 +671,7 @@ if __name__ == '__main__':
         auc_scores_model_4.append(auc4)
 
         # Model 5
-        auc5, y5_true, y5_pred = run_cnn_train(X5, y5_encoded, train_idx, val_idx, input_dim=num_columns, output_dim=1, batch_size=1024, epochs=5)
+        auc5, y5_true, y5_pred = run_cnn_train(X5, y5_encoded, train_idx, val_idx, input_dim=num_columns, output_dim=1, epochs=10)
         all_fold_roc_data['model_5']['true_labels'].append(y5_true)
         all_fold_roc_data['model_5']['pred_scores'].append(y5_pred)
         auc_scores_model_5.append(auc5)

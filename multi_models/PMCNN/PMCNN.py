@@ -160,8 +160,8 @@ def main(csv_path, list_path):
                              X_test_tensor[:, X_test_tensor.shape[1]//2:3*X_test_tensor.shape[1]//4],
                              X_test_tensor[:, 3*X_test_tensor.shape[1]//4:], y_test)
 
-    train_loader = DataLoader(train_dataset, batch_size=1024, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=1024, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     model = Net()
     criterion = nn.CrossEntropyLoss()

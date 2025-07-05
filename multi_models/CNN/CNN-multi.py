@@ -59,8 +59,7 @@ class CNNModel(nn.Module):
         x = self.fc3(x)
         return x
 
-def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, epochs):
-
+def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, epochs):
     X_train, X_val = X[train_idx], X[val_idx]
     y_train, y_val = y[train_idx], y[val_idx]
 
@@ -70,13 +69,17 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, e
     y_train = torch.tensor(y_train, dtype=torch.long)
     y_val = torch.tensor(y_val, dtype=torch.long)
 
-
     model = CNNModel(input_dim=input_dim, output_dim=output_dim).to('cpu')
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.0001)
 
+
     train_data = torch.utils.data.TensorDataset(X_train, y_train)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=128, shuffle=True)
+
+    val_data = torch.utils.data.TensorDataset(X_val, y_val)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=64, shuffle=False)
+
 
     for epoch in range(epochs):
         model.train()
@@ -89,13 +92,25 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, batch_size, e
             optimizer.step()
             running_loss += loss.item()
 
+
     model.eval()
     with torch.no_grad():
-        y_pred_val = model(X_val)
+        all_pred_probs = []
+        all_true_labels = []
+        for X_batch, y_batch in val_loader:
+            y_pred_val = model(X_batch)
 
-    pred_probs = torch.softmax(y_pred_val, dim=1).cpu().numpy()
-    auc_score = roc_auc_score(y_val.cpu().numpy(), pred_probs, multi_class="ovr", average="macro")
-    return auc_score, y_val.cpu().numpy(), pred_probs
+            pred_probs = torch.softmax(y_pred_val, dim=1).cpu().numpy()
+            all_pred_probs.extend(pred_probs)
+            all_true_labels.extend(y_batch.cpu().numpy())
+
+
+    y_pred_prob = np.array(all_pred_probs)
+    y_true = np.array(all_true_labels)
+    auc_score = roc_auc_score(y_true, y_pred_prob, multi_class="ovr", average="macro")
+
+    return auc_score, y_true, y_pred_prob
+
 
 
 if __name__ == '__main__':
@@ -139,8 +154,7 @@ if __name__ == '__main__':
             X5, y5_encoded, train_idx, val_idx,
             input_dim=num_columns,
             output_dim=num_classes,
-            batch_size=1024,
-            epochs=5
+            epochs=10
         )
         auc_scores_model_5.append(auc_score)
 

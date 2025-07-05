@@ -87,7 +87,7 @@ def cv_function(config, seed):
             y_val_tensor = torch.tensor(y_val_fold, dtype=torch.float32).unsqueeze(1)
 
         train_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_train_tensor, y_train_tensor),
-                                                   batch_size=config.bs, shuffle=True)
+                                                   batch_size=6, shuffle=True)
         val_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_val_tensor, y_val_tensor),
                                                  batch_size=config.bs, shuffle=False)
 

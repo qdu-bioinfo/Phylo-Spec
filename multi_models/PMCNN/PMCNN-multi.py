@@ -147,15 +147,15 @@ def run_model_3_train(X, y, train_idx, val_idx):
         y_test
     )
 
-    train_loader = DataLoader(train_dataset, batch_size=1024, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=1024, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     model = Net(num_classes=num_classes)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0001,weight_decay=0.0001)
 
     model.train()
-    for epoch in range(5):
+    for epoch in range(10):
         for inputs, labels in train_loader:
             x1, x2, x3, x4 = inputs
             outputs = model(x1, x2, x3, x4)

@@ -105,18 +105,23 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding, n_classes):
 
     return best_true_labels, best_pred_labels, best_pred_probs
 
+
 def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, n_classes,
-          batch_size=1024, lr=1e-4, hidden_size=32, kernal_size_conv=13,
+          lr=1e-4, hidden_size=32, kernal_size_conv=13,
           kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     criterion = nn.CrossEntropyLoss()
 
     train_dataset = DeepPhyDataset(phy_embedding, X_train, Y_train)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
+
+    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True,
                               collate_fn=train_dataset.custom_collate_fn)
+
     val_dataset = DeepPhyDataset(phy_embedding, X_eval, Y_eval)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,
+
+    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False,
                             collate_fn=train_dataset.custom_collate_fn)
+
     model = MultiClassDeepPhylo(hidden_size=hidden_size,
                                 embeddings=train_dataset.embeddings,
                                 kernel_size_conv=kernal_size_conv,
@@ -126,8 +131,8 @@ def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, n_classes,
                                 n_classes=n_classes).to(device)
     optimizer = optim.AdamW(model.parameters(), lr=lr)
 
-    epochs = 5
-    patience = 20
+    epochs = 10
+    patience = 1
     best_val_loss = float("inf")
     counter = 0
 
@@ -183,6 +188,7 @@ def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, n_classes,
     del model, optimizer
     return train_losses, val_losses, val_true_labels, val_pred_probs
 
+
 def select_best_epoch(val_losses):
     best_epoch = np.argmin(val_losses)
     return best_epoch
@@ -196,14 +202,11 @@ if __name__ == '__main__':
 
     set_seed(42)
 
-    # Load inputs
     X4 = np.load(args.xnpy)
     y4 = np.load(args.ynpy)
     phy_embedding = np.load(args.embed)
 
-    # Load sample names (assumes a CSV with same name as y.npy)
-    y_csv_path = args.y.replace('.npy', '.csv')
-    sample_names = pd.read_csv(y_csv_path).iloc[:, 0].values
+    # Removed the sample_names related logic
 
     n_classes = len(np.unique(y4))
     print(f"Number of classes: {n_classes}")
@@ -215,7 +218,6 @@ if __name__ == '__main__':
     all_true_labels = []
     all_pred_labels = []
     all_pred_probs = []
-    all_sample_names = []
 
     for fold, (train_idx, val_idx) in enumerate(skf.split(X4, y4)):
         print(f"\nRunning Fold {fold + 1} for Model 4...")
@@ -223,15 +225,12 @@ if __name__ == '__main__':
         train_idx_4 = [i for i in train_idx if i < len(X4)]
         val_idx_4 = [i for i in val_idx if i < len(X4)]
 
-        fold_sample_names = sample_names[val_idx_4]
-
         true_labels, pred_labels, pred_probs = run_model_4_train(
             X4, y4, train_idx_4, val_idx_4, phy_embedding, n_classes)
 
         all_true_labels.extend(true_labels)
         all_pred_labels.extend(pred_labels)
         all_pred_probs.append(pred_probs)
-        all_sample_names.extend(fold_sample_names)
 
         if n_classes > 2:
             y_true_bin = label_binarize(true_labels, classes=np.arange(n_classes))
@@ -253,7 +252,6 @@ if __name__ == '__main__':
     all_pred_probs = np.concatenate(all_pred_probs, axis=0)
 
     results_df = pd.DataFrame({
-        'Sample_Name': all_sample_names,
         'True_Label': all_true_labels,
         'Predicted_Label': all_pred_labels
     })

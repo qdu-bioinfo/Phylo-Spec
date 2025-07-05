@@ -8,7 +8,7 @@ def get_config_train_test():
     parser.add_argument('--PhyloSpec', type=str, required=True, choices=['train', 'test' , 'cv'],
                         help="Mode of operation: 'train' , 'test' or 'cv'.")
     parser.add_argument('-c', type=str, required=True, help="Path to the CSV file (train , test or cv).")
-    parser.add_argument('-bs', type=int, default=8, help="Batch size.")
+    parser.add_argument('-bs', type=int, default=64, help="Batch size.")
     parser.add_argument('-ep', type=int, default=10, help="Number of epochs.")
     parser.add_argument('-lr', type=float, default=1e-4, help="Learning rate.")
     parser.add_argument('-ch', type=int, default=16, help="Number of channels in the model.")
