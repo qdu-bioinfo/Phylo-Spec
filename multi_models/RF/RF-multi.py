@@ -62,7 +62,7 @@ for fold_idx, (train_index, test_index) in enumerate(kf.split(X, y), 1):
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    clf = RandomForestClassifier(n_estimators=500, max_depth=4, max_features="log2", random_state=42)
+    clf = RandomForestClassifier(n_estimators=500, max_depth=5, max_features="log2", random_state=42)
     clf.fit(X_train, y_train)
 
     y_pred = clf.predict(X_test)

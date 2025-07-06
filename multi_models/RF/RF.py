@@ -41,7 +41,7 @@ def main(csv_path):
         X_train = scaler.fit_transform(X_train)
         X_test = scaler.transform(X_test)
 
-        rf_classifier = RandomForestClassifier(n_estimators=500, max_depth=4, max_features="log2", random_state=42)
+        rf_classifier = RandomForestClassifier(n_estimators=500, max_depth=5, max_features="log2", random_state=42)
         rf_classifier.fit(X_train, y_train)
 
         y_pred = rf_classifier.predict(X_test)
