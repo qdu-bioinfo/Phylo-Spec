@@ -15,6 +15,20 @@ biopython
 openpyxl
 ```
 
+
+
+## Installation environment
+
+```
+1.git clone https://github.com/qdu-bioinfo/Phylo-Spec.git
+2.cd Phylo-Spec/multi_models
+3.conda create -n PhyloSpec python=3.8
+4.conda activate PhyloSpec
+5.sh init.sh
+```
+
+
+
 ## For a single disease classification:
 
 1. model 1 MetaDR (Source is MetaDR  Folder): 

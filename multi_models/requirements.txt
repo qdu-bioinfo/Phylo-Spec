@@ -1,0 +1,9 @@
+torch
+pandas
+numpy
+scikit-learn
+imbalanced-learn
+ete3
+matplotlib
+biopython
+openpyxl
