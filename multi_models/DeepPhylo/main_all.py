@@ -15,7 +15,7 @@ from deepphylo.model import DeepPhylo_ibd as DeepPhylo
 from deepphylo.pre_dataset import DeepPhyDataset
 
 def train(X_train, Y_train, X_eval, Y_eval, phy_embedding,
-          train_batch_size=125, val_batch_size=64,
+          train_batch_size=125, val_batch_size=8,
           lr=1e-4, hidden_size=32, kernal_size_conv=13,
           kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -149,7 +149,6 @@ if __name__ == '__main__':
     kernel_size_pool = 4
     dropout_conv = 0.2
     lr = 1e-4
-    batch_size = 64
     portion = 0.0
     activation = nn.LeakyReLU()
 
@@ -166,7 +165,7 @@ if __name__ == '__main__':
         print(f'Number of validation samples: {len(Y_eval)}, +: {sum(Y_eval)}, -: {len(Y_eval) - sum(Y_eval)}')
         train_losses, val_losses, val_true_labels, val_pred_labels = train(
             X_train, Y_train, X_eval, Y_eval, phy_embedding,
-            train_batch_size=1024, val_batch_size=64,
+            train_batch_size=1024, val_batch_size=8,
             lr=lr, hidden_size=hidden_size,
             kernal_size_conv=kernal_size_conv, kernel_size_pool=kernel_size_pool,
             dropout_conv=dropout_conv, activation=activation)

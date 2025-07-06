@@ -161,13 +161,13 @@ def main(csv_path, list_path):
                              X_test_tensor[:, 3*X_test_tensor.shape[1]//4:], y_test)
 
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
     model = Net()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-3)
 
-    train_model(model, criterion, optimizer, train_loader, epoch=5)
+    train_model(model, criterion, optimizer, train_loader, epoch=10)
     results = evaluate_model(model, test_loader)
 
     print(f"Test AUC: {results['auc']:.4f}, Test Kappa: {results['kappa']:.4f}")

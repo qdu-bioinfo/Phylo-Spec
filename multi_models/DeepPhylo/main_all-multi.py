@@ -119,7 +119,7 @@ def train(X_train, Y_train, X_eval, Y_eval, phy_embedding, n_classes,
 
     val_dataset = DeepPhyDataset(phy_embedding, X_eval, Y_eval)
 
-    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False,
+    val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False,
                             collate_fn=train_dataset.custom_collate_fn)
 
     model = MultiClassDeepPhylo(hidden_size=hidden_size,

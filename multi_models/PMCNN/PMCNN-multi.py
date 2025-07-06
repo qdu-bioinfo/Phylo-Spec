@@ -148,7 +148,7 @@ def run_model_3_train(X, y, train_idx, val_idx):
     )
 
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
     model = Net(num_classes=num_classes)
     criterion = nn.CrossEntropyLoss()

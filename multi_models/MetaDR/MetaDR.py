@@ -27,7 +27,7 @@ parser.add_argument('-c', '--abundance', required=True, help='Path to abundance 
 parser.add_argument('-t', '--tree', required=True, help='Path to Newick tree file (.nwk)')
 args = parser.parse_args()
 
-in_feature=1800
+
 abundance_file = args.c
 tree_file = args.t
 output_prefix = 'output'
@@ -96,7 +96,7 @@ class SimpleCNN(nn.Module):
         )
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_feature, 500),
+            nn.Linear(1800, 500),
             nn.ReLU(),
             nn.Linear(500, num_classes)
         )

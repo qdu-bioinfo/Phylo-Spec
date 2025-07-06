@@ -330,7 +330,7 @@ def run_model_3_train(X, y, train_idx, val_idx):
                              X_test[:, 3 * X_test.shape[1] // 4:], y_test)
 
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
     model = Net()
     criterion = nn.CrossEntropyLoss()
@@ -386,7 +386,7 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding):
 
     train_losses, val_losses, val_true_labels, val_pred_labels = train(
         X_train, y_train, X_eval, y_eval, phy_embedding,
-        train_batch_size=128, val_batch_size=64,
+        train_batch_size=128, val_batch_size=8,
         lr=0.0001, hidden_size=32,
         kernal_size_conv=13, kernel_size_pool=4,
         dropout_conv=0.2, activation=nn.LeakyReLU())
@@ -396,7 +396,7 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding):
 
 # model4-DeepPhylo
 def train(X_train, Y_train, X_eval, Y_eval, phy_embedding,
-          train_batch_size=128, val_batch_size=64,
+          train_batch_size=128, val_batch_size=8,
           lr=1e-4, hidden_size=32, kernal_size_conv=13,
           kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -545,7 +545,7 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, epochs):
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=128, shuffle=True)
 
     val_data = torch.utils.data.TensorDataset(X_val, y_val)
-    val_loader = torch.utils.data.DataLoader(val_data, batch_size=64, shuffle=False)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=8, shuffle=False)
 
     for epoch in range(epochs):
         model.train()
