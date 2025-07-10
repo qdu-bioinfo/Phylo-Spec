@@ -151,7 +151,7 @@ def test_model_function(config, seed):
     y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
-    test_loader = DataLoader(test_dataset, batch_size=config.bs, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     # Load trained model
     final_model = torch.load(config.o + 'train_model.pth')

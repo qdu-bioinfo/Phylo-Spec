@@ -89,7 +89,7 @@ def cv_function(config, seed):
         train_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_train_tensor, y_train_tensor),
                                                    batch_size=6, shuffle=True)
         val_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_val_tensor, y_val_tensor),
-                                                 batch_size=config.bs, shuffle=False)
+                                                 batch_size=64, shuffle=False)
 
         aux_model = AuxiliaryModel()
         fc1_input_dim = calculate_fc1_input_dim(aux_model, X_train_smote, conv_order, data, leaf_to_species,
