@@ -33,6 +33,8 @@ openpyxl
 
 1. model 1 MetaDR (Source is MetaDR  Folder): 
 
+   Manual modification of the fully connected layer dimensions: line (#99)
+
    ```
    cd multi_models
    python MetaDR/MetaDR.py -c input_for_all_models/Synthetic_Dataset_1/Synthetic_Dataset_1.csv -t input_for_all_models/Synthetic_Dataset_1/Synthetic_Dataset_1.nwk
@@ -46,6 +48,8 @@ openpyxl
    ```
 
 3. model 3 PM-CNN: 
+
+   Manual modification of the fully connected layer dimensions: line (#71)
 
    ```
    cd multi_models
@@ -68,6 +72,8 @@ openpyxl
 
 6. Run all models with one click: 
 
+   Manual modification of the fully connected layer dimensions: line (#65 and #607)
+
    ```
    python Multi-comparison-models.py -c input_for_all_models/Synthetic_Dataset_1/Synthetic_Dataset_1.csv -t input_for_all_models/Synthetic_Dataset_1/Synthetic_Dataset_1.nwk -l input_for_all_models/Synthetic_Dataset_1/PMCNN_Synthetic_Dataset_1.csv -npy input_for_all_models/Synthetic_Dataset_1/Synthetic_Dataset_1_DeepPhylo_X.npy input_for_all_models/Synthetic_Dataset_1/Synthetic_Dataset_1_DeepPhylo_y.npy input_for_all_models/Synthetic_Dataset_1/Synthetic_Dataset_1_DeepPhylo_embeding.npy
    ```
@@ -77,6 +83,8 @@ openpyxl
 ## For multiple disease classification:
 
 1. model 1 MetaDR (Source is MetaDR  Folder): 
+
+   Manual modification of the fully connected layer dimensions: line (#99)
 
    ```
    cd multi_models
@@ -91,6 +99,8 @@ openpyxl
    ```
 
 3. model 3 PM-CNN: 
+
+   Manual modification of the fully connected layer dimensions: line (#53)
 
    ```
    cd multi_models
