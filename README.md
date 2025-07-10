@@ -67,7 +67,7 @@ If building a phylogenetic tree is very time-consuming, it is recommended that y
 
 
 
-*ii.* For whole-genome shotgun (WGS) metagenomic data, we recommended using the MetaPhlAn3, MetaPhlAn4, RefSeq taxonomy and its corresponding reference phylogenetic tree, which provided species-level resolution with well-curated evolutionary relationships. Specific usage: " -t ./database/WGS/wgs_mpa4_phylogeny.nwk "
+*ii.* For whole-genome shotgun (WGS) metagenomic data, we recommended using the MetaPhlAn2, MetaPhlAn3, MetaPhlAn4, RefSeq taxonomy and its corresponding reference phylogenetic tree, which provided species-level resolution with well-curated evolutionary relationships. Specific usage: " -t ./database/WGS/wgs_mpa4_phylogeny.nwk "
 
 
 
