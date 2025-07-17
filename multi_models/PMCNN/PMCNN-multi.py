@@ -49,15 +49,12 @@ class Net(nn.Module):
         self.conv3_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
         self.conv4_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
         self.conv4_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
-        self.bn1 = nn.BatchNorm1d(num_features=64)
         self.fc1 = nn.Linear(2368, 64)
         self.fc2 = nn.Linear(64, num_classes)
 
     def conv_block(self, x, conv1, conv2):
-        x = torch.tanh(conv1(x))
-        x = nn.BatchNorm1d(num_features=16)(x)
-        x = torch.tanh(conv2(x))
-        x = nn.BatchNorm1d(num_features=16)(x)
+        x = torch.relu(conv1(x))
+        x = torch.relu(conv2(x))
         return x
 
     def forward(self, x1, x2, x3, x4):
@@ -78,8 +75,7 @@ class Net(nn.Module):
         x4 = x4.view(x4.size(0), -1)
         x = torch.cat((x1, x2, x3, x4), dim=1)
         x = self.fc1(x)
-        x = self.bn1(x)
-        x = torch.tanh(x)
+        x = torch.relu(x)
         x = self.fc2(x)
         return x
 
@@ -147,8 +143,8 @@ def run_model_3_train(X, y, train_idx, val_idx):
         y_test
     )
 
-    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     model = Net(num_classes=num_classes)
     criterion = nn.CrossEntropyLoss()

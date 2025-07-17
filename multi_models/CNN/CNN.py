@@ -74,10 +74,10 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, epochs):
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.0001)
 
     train_data = torch.utils.data.TensorDataset(X_train, y_train)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=128, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
 
     val_data = torch.utils.data.TensorDataset(X_val, y_val)
-    val_loader = torch.utils.data.DataLoader(val_data, batch_size=8, shuffle=False)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=64, shuffle=False)
 
     for epoch in range(epochs):
         model.train()

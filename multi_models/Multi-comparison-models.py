@@ -61,15 +61,12 @@ class Net(nn.Module):
         self.conv3_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
         self.conv4_1 = nn.Conv1d(1, out_channels=16, kernel_size=8, stride=7, padding=1)
         self.conv4_2 = nn.Conv1d(in_channels=16, out_channels=16, kernel_size=8, stride=7, padding=1)
-        self.bn1 = nn.BatchNorm1d(num_features=64)
         self.fc1 = nn.Linear(704, 64)
         self.fc2 = nn.Linear(64, 2)
 
     def conv_block(self, x, conv1, conv2):
-        x = F.tanh(conv1(x))
-        x = nn.BatchNorm1d(num_features=16)(x)
-        x = F.tanh(conv2(x))
-        x = nn.BatchNorm1d(num_features=16)(x)
+        x = F.relu(conv1(x))
+        x = F.relu(conv2(x))
         return x
 
     def forward(self, x1, x2, x3, x4):
@@ -89,8 +86,7 @@ class Net(nn.Module):
         x4 = x4.view(x4.size(0), -1)
         x = torch.cat((x1, x2, x3, x4), dim=1)
         x = self.fc1(x)
-        x = self.bn1(x)
-        x = F.tanh(x)
+        x = F.relu(x)
         x = F.softmax(self.fc2(x), dim=1)
 
         return x
@@ -329,8 +325,8 @@ def run_model_3_train(X, y, train_idx, val_idx):
                              X_test[:, X_test.shape[1] // 2:3 * X_test.shape[1] // 4],
                              X_test[:, 3 * X_test.shape[1] // 4:], y_test)
 
-    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     model = Net()
     criterion = nn.CrossEntropyLoss()
@@ -386,7 +382,7 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding):
 
     train_losses, val_losses, val_true_labels, val_pred_labels = train(
         X_train, y_train, X_eval, y_eval, phy_embedding,
-        train_batch_size=128, val_batch_size=8,
+        train_batch_size=64, val_batch_size=64,
         lr=0.0001, hidden_size=32,
         kernal_size_conv=13, kernel_size_pool=4,
         dropout_conv=0.2, activation=nn.LeakyReLU())
@@ -396,7 +392,7 @@ def run_model_4_train(X, y, train_idx, val_idx, phy_embedding):
 
 # model4-DeepPhylo
 def train(X_train, Y_train, X_eval, Y_eval, phy_embedding,
-          train_batch_size=128, val_batch_size=8,
+          train_batch_size=64, val_batch_size=64,
           lr=1e-4, hidden_size=32, kernal_size_conv=13,
           kernel_size_pool=4, dropout_conv=0.2, activation=nn.LeakyReLU()):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -542,10 +538,10 @@ def run_cnn_train(X, y, train_idx, val_idx, input_dim, output_dim, epochs):
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.0001)
 
     train_data = torch.utils.data.TensorDataset(X_train, y_train)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=128, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
 
     val_data = torch.utils.data.TensorDataset(X_val, y_val)
-    val_loader = torch.utils.data.DataLoader(val_data, batch_size=8, shuffle=False)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=64, shuffle=False)
 
     for epoch in range(epochs):
         model.train()
