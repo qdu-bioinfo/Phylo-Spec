@@ -65,7 +65,7 @@ def train_model_function(config, seed):
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-    train_loader = DataLoader(train_dataset, batch_size=6, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 
     # Prepare auxiliary model to determine input dimension for FC layer
     aux_model = AuxiliaryModel(channel=config.ch, kernel_size=config.ks)
