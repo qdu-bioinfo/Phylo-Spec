@@ -4,14 +4,14 @@
 
 ```
 python3.8
-torch
-pandas
-numpy
-scikit-learn
-imbalanced-learn
-ete3
-matplotlib
-biopython
+torch >= 2.3.1
+pandas >= 2.2.2
+numpy >= 1.26.4
+scikit-learn >= 1.4.2
+imbalanced-learn >= 0.12.3
+ete3 >= 3.1.3
+matplotlib >= 3.7.2
+biopython >= 1.83
 openpyxl
 ```
 
