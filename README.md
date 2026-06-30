@@ -17,6 +17,7 @@
   - [e. Phylo-Spec Importance](#e-phylo-spec-importance)
 - [Run the example with one click](#run-the-example-with-one-click)
 - [Supplementary](#supplementary)
+- [Citation](#citation)
 - [Contact](#contact)
 
 ## Introduction
@@ -228,6 +229,10 @@ chmod a+x example.sh
 [**Real Dataset 4**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%20WGS_T2D) contains 116 T2D WGS Metagenome samples processed by MetaPhlAn4.
 
 [**Real Dataset 5**](https://github.com/qdu-bioinfo/Phylo-Spec/tree/main/data/Real%20Dateset%20Multi-classification) contains 704 Control, 142 CRC, 914 IBD, 84 IBS, 138 ASD samples processed by Parallel-Meta Suite.
+
+## Citation
+
+Zhang J, Meng F, Sun Y, Xu W, Wu S, Su X. 2025. Phylo-Spec: a phylogeny-fusion deep learningmodel advances microbiome status identification. mSystems 10:e01453-25. https://doi.org/10.1128/msystems.01453-25
 
 ## Contact
 
